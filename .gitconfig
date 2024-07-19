@@ -1,0 +1,14 @@
+[user]
+	name = Omar Abdulaziz
+	email = omarabdul3ziz@gmail.com
+
+[core]
+	excludesfile = ~/.gitignore
+	editor = vim
+	compression = 0
+
+[alias]
+	publish = "!f() { git push -u origin $1; }; f"
+
+[init]
+	defaultBranch = main
