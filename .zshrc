@@ -116,6 +116,7 @@ export FZF_DEFAULT_OPTS="--layout=reverse --inline-info --height=80%"
 
 ZSH_THEME="alanpeabody"
 
-export MNE='mom picnic deliver again rug night rabbit music motion hole lion where'
 
 . "$HOME/.shellrc"
+. "$HOME/.env"
+. "$HOME/.aliases"

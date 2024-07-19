@@ -1,26 +1,15 @@
 #!/bin/bash
 
-open_remote_code(){
-	code --folder-uri vscode-remote://ssh-remote+$1
+open_remote_code() {
+  code --folder-uri vscode-remote://ssh-remote+$1
 }
 
 # Aliases
-alias incnod='export NODE_OPTIONS="--max-old-space-size=8192 --openssl-legacy-provider"'
-alias goo="code /home/omar/src/cs/go-sdk"
-alias zoo='code ~/src/cs/zsdk/zos'
-alias play='code /home/omar/src/playground/go'
-alias gapi='code /home/omar/src/cs/gapi'
-alias csh='open_remote_code $1'
+. "~/.aliases"
+. "~/.env"
 
 # Paths
-export PATH=$PATH:/home/omar/src/cs/bin
-export PATH=$PATH:/usr/local/go/bin
-export PATH=$PATH:/home/go/bin
-export PATH=$PATH:/opt/nvim-linux64/bin
+export PATH=$PATH:/usr/local/go/bin:/home/omar/go/bin:/opt/nvim-linux64/bin
 
 # Configs
 . "$HOME/.cargo/env"
-
-# Envars
-export MNEMONIC='mom picnic deliver again rug night rabbit music motion hole lion where'
-export NETWORK='dev'
