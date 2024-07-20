@@ -5,8 +5,8 @@ open_remote_code() {
 }
 
 # Aliases
-. "~/.aliases"
-. "~/.env"
+. "$HOME/.aliases"
+. "$HOME/.env"
 
 # Paths
 export PATH=$PATH:/usr/local/go/bin:/home/omar/go/bin:/opt/nvim-linux64/bin

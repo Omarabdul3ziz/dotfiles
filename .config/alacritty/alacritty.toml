@@ -30,3 +30,6 @@ size = 15
 bindings = [
   { key = "F11", action = "ToggleFullscreen" }
 ]
+
+[shell]
+program = "tmux"
