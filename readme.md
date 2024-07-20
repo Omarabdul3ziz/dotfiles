@@ -2,6 +2,14 @@
 
 # Tools
 
+Theming and styling
+- prefered to be consistant on all alacrity/tmux/nvim
+- currently is catppuccin/mocha
+
+App
+- used every where
+- settings is customizable with conf file
+
 Terminal
 - envs
 - aliases

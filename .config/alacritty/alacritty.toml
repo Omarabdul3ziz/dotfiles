@@ -1,0 +1,32 @@
+
+# --- global level ---
+# apply your config on save
+live_config_reload = true
+
+# import the theme and other configs
+import = [
+  "~/.config/alacritty/catppuccin-mocha.toml"
+]
+
+[window]
+padding = { x = 10, y = 10 }
+startup_mode = "Fullscreen" # "Maximized"
+decorations = "Buttonless" # "None" for the window borders
+dynamic_title = false
+
+
+# to allow the colors for the theme
+[env]
+TERM = "xterm-256color"
+
+[cursor]
+style = { shape = "Underline", blinking = "Always"}
+
+# by default it is using mono nerd
+[font]
+size = 15 
+
+[keyboard]
+bindings = [
+  { key = "F11", action = "ToggleFullscreen" }
+]
