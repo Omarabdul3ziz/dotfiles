@@ -1,5 +1,7 @@
 # dotfiles ~/.*
 
+- `autostart` starts > `alacrity` starts with > `tmux` restore the sessions 
+
 # Tools
 
 Theming and styling
