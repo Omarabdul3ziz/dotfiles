@@ -46,3 +46,8 @@ stow -t <home> -D .
 ```
 
 Note, .stow-local-ignore ignore some non dotfiles
+
+# ideas
+
+- try nord theme.
+- 

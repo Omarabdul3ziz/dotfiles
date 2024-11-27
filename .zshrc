@@ -120,3 +120,6 @@ ZSH_THEME="alanpeabody"
 . "$HOME/.shellrc"
 . "$HOME/.env"
 . "$HOME/.aliases"
+
+# add Pulumi to the PATH
+export PATH=$PATH:/home/omar/.pulumi/bin
