@@ -51,3 +51,8 @@ Note, .stow-local-ignore ignore some non dotfiles
 
 - try nord theme.
 - 
+
+
+# nvim
+with stow `~/.config/nvim` link to here `.config/nvim`
+which links to one of multiple setups ./current-nvim/ or ./vanilla-nvim/

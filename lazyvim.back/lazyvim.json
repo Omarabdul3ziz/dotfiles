@@ -1,0 +1,10 @@
+{
+  "extras": [
+    "lazyvim.plugins.extras.editor.refactoring",
+    "lazyvim.plugins.extras.lang.go"
+  ],
+  "news": {
+    "NEWS.md": "7429"
+  },
+  "version": 7
+}
