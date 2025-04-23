@@ -1,19 +1,12 @@
-
-# --- global level ---
-# apply your config on save
-live_config_reload = true
-
-# import the theme and other configs
-import = [
-  "~/.config/alacritty/catppuccin-mocha.toml"
-]
-
 [window]
 padding = { x = 10, y = 10 }
 startup_mode = "Fullscreen" # "Maximized"
 decorations = "Buttonless" # "None" for the window borders
 dynamic_title = false
 
+[window.dimensions]
+columns = 125
+lines = 35
 
 # to allow the colors for the theme
 [env]
@@ -30,6 +23,17 @@ size = 15
 bindings = [
   { key = "F11", action = "ToggleFullscreen" }
 ]
-#
-# [shell]
-# program = "tmux a -t devenv"
+
+[general]
+
+# --- global level ---
+# apply your config on save
+live_config_reload = true
+
+# import the theme and other configs
+import = [
+  "~/.config/alacritty/catppuccin-mocha.toml"
+]
+
+[terminal.shell]
+ program = "tmux"

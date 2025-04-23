@@ -81,7 +81,7 @@ plugins=(
 )
 
 source $ZSH/oh-my-zsh.sh
-
+source ~/.env
 # User configuration
 
 # export MANPATH="/usr/local/man:$MANPATH"
@@ -123,3 +123,7 @@ ZSH_THEME="alanpeabody"
 
 # add Pulumi to the PATH
 export PATH=$PATH:/home/omar/.pulumi/bin
+
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && \. "$NVM_DIR/nvm.sh"  # This loads nvm
+[ -s "$NVM_DIR/bash_completion" ] && \. "$NVM_DIR/bash_completion"  # This loads nvm bash_completion
