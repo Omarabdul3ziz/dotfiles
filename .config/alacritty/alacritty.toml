@@ -1,3 +1,10 @@
+# import the theme and other live_config_reload
+import = [
+  "~/.config/alacritty/catppuccin-mocha.toml"
+]
+
+live_config_reload = true
+
 [window]
 padding = { x = 10, y = 10 }
 startup_mode = "Fullscreen" # "Maximized"
@@ -24,16 +31,3 @@ bindings = [
   { key = "F11", action = "ToggleFullscreen" }
 ]
 
-[general]
-
-# --- global level ---
-# apply your config on save
-live_config_reload = true
-
-# import the theme and other configs
-import = [
-  "~/.config/alacritty/catppuccin-mocha.toml"
-]
-
-[terminal.shell]
- program = "tmux"

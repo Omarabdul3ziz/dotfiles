@@ -12,5 +12,6 @@ return {
     },
   },
   build = "make",
+  -- auth setup up using copilot
   opts = { provider = "copilot" },
 }

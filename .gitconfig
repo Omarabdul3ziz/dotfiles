@@ -7,9 +7,6 @@
 	editor = vim
 	compression = 0
 
-[alias]
-	publish = "!f() { git push -u origin $1; }; f"
-
 [init]
 	defaultBranch = main
 
@@ -26,3 +23,7 @@
     cmd = meld "$LOCAL" "$BASE" "$REMOTE" --output "$MERGED"
 [push]
 	autoSetupRemote = true
+[credential]
+	helper = /usr/share/doc/git/contrib/credential/libsecret/git-credential-libsecret
+[pull]
+	rebase = true
