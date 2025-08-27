@@ -1,4 +1,7 @@
 #!/bin/bash
+# This script will bootstrap a new Ubuntu installation with my preferred software and settings.
+# It is idempotent and can be run multiple times without causing issues.
+# Configurable, you can choose what to install
 
 echo "Up..."
 export DEBIAN_FRONTEND=noninteractive
