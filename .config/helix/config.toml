@@ -10,4 +10,4 @@ auto-format = true
 hidden = false
 
 [keys.normal]
-"space" = { q = ":quit", w = ":w" }
+"space" = { q = ":quit-all", s = ":write" }
