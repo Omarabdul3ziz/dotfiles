@@ -8,4 +8,6 @@ alias ngoo="nvim ~/github.com/threefoldtech/tfgrid-sdk-go/"
 alias nzoo="nvim ~/github.com/threefoldtech/zos/"
 alias nsnip="code ~/github.com/Omarabdul3ziz/go-snippets/"
 
-alias fd=fdfind
+
+alias gtdb='git branch --merged | grep -v "^\*" | xargs -r git branch -d'
+

@@ -22,5 +22,5 @@ _darcs
 ^/COPYING
 
 # Mine
-.*/*.(md|sh|bak)
+.*/*.(md|sh|bak|nix)
 lazyvim
