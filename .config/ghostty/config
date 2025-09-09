@@ -22,7 +22,11 @@ initial-window = true
 resize-overlay = never
 window-save-state = always
 window-step-resize = false
-
+window-decoration = none
+gtk-titlebar = false
+window-padding-x = 5
+window-padding-y = 5
+window-padding-balance = true
 
 # behavior
 auto-update = check

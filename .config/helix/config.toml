@@ -5,6 +5,7 @@ line-number = "relative"
 cursor-shape = { insert = "bar", normal = "block", select = "underline" }
 auto-save = true
 auto-format = true
+clipboard-provider = "x-clip"
 
 [editor.file-picker]
 hidden = false

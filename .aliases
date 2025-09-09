@@ -7,3 +7,5 @@ alias cod='code ~/github.com/threefoldtech/main.code-workspace'
 alias gtdb='git branch --merged | grep -v "^\*" | xargs -r git branch -d'
 alias lg='lazygit'
 
+#
+alias dohaeris='sudo $(fc -ln -1)'
