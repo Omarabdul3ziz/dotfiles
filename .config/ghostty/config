@@ -33,3 +33,14 @@ auto-update = check
 auto-update-channel = stable
 quit-after-last-window-closed = true
 shell-integration-features = true
+
+# misc
+keybind = alt+one=unbind
+keybind = alt+two=unbind
+keybind = alt+three=unbind
+keybind = alt+four=unbind
+keybind = alt+five=unbind
+keybind = alt+six=unbind
+keybind = alt+seven=unbind
+keybind = alt+eight=unbind
+keybind = alt+nine=unbind
