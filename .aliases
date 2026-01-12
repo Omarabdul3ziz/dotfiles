@@ -1,7 +1,8 @@
 #!/bin/bash
 
 # CODE
-alias cod='code ~/github.com/threefoldtech/main.code-workspace'
+alias zos='cursor /home/omar/github.com/threefoldtech/zos3.code-workspace'
+alias zosl='cursor /home/omar/github.com/threefoldtech/zoslight.code-workspace'
 
 # GIT
 alias gtdb='git branch --merged | grep -v "^\*" | xargs -r git branch -d'

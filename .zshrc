@@ -20,3 +20,10 @@ source $ZSH/oh-my-zsh.sh
 # export FZF_DEFAULT_OPTS="--layout=reverse --inline-info --height=80%"
 
 source "$HOME/.shellrc"
+export PATH="$HOME/.local/bin:$PATH"
+
+# opencode
+export PATH=/home/omar/.opencode/bin:$PATH
+export PATH="$HOME/hero/bin:$PATH"
+
+export EDITOR=hx

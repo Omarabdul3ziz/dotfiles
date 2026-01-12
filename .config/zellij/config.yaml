@@ -1,0 +1,5 @@
+keybinds:
+  toggle_layout:
+    key: "g"
+    mods: ["Alt"]
+    action: ToggleLayout
