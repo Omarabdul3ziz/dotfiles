@@ -267,6 +267,8 @@ plugins {
 // eg. "file:/path/to/my-plugin.wasm"
 // eg. "https://example.com/my-plugin.wasm"
 load_plugins {
+    "file:/home/omar/.config/zellij/plugins/zjstatus.wasm"
+    "file:/home/omar/.config/zellij/plugins/statusbar.wasm"
 }
 web_client {
     font "monospace"
@@ -282,7 +284,23 @@ web_client {
 // Choose the theme that is specified in the themes section.
 // Default: default
 // 
-theme "nord"
+// theme "nord"
+
+themes {
+    default {
+        fg "#afb4c3"
+        bg "#272b30"
+        black "#272b30"
+        red "#cc6666"
+        green "#bdb968"
+        yellow "#f0c674"
+        blue "#81a2be"
+        magenta "#b08cba"
+        cyan "#7fb2c8"
+        white "#afb4c3"
+        orange "#de935f"
+    }
+}
  
 // Choose the base input mode of zellij.
 // Default: normal
@@ -344,7 +362,7 @@ default_layout "main"
 //   - detach (Default)
 //   - quit
 // 
-// on_force_close "quit"
+on_force_close "detach"
  
 // Configure the scroll back buffer size
 // This is the number of lines zellij stores for each pane in the scroll back
