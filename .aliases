@@ -10,3 +10,4 @@ alias lg='lazygit'
 
 #
 alias dohaeris='sudo $(fc -ln -1)'
+alias zj='zellij'
