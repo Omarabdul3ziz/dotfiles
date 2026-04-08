@@ -1,3 +1,4 @@
 .env
 .cursor
+.claude
 zos/go.work*

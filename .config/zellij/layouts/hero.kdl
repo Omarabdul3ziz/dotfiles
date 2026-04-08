@@ -1,0 +1,34 @@
+layout {
+  cwd "/home/omar/github.com/geomind/"
+
+  default_tab_template {
+    children
+    pane size=1 borderless=true {
+      plugin location="file:/home/omar/.config/zellij/plugins/statusbar.wasm"
+    }
+  }
+
+  tab name="herolib" {
+    pane stacked=true {
+      pane name="src" command="nvim" cwd="~/github.com/geomind/herolib_rust/" {
+        args "."
+      }
+      pane name="sh" cwd="~/github.com/geomind/herolib_rust/"
+      pane name="ai" command="claude" cwd="~/github.com/geomind/herolib_rust/"
+    }
+  }
+
+  tab name="mos" {
+    pane stacked=true {
+      pane name="src" command="nvim" cwd="~/github.com/geomind/mos_builder/" {
+        args "."
+      }
+      pane name="sh" cwd="~/github.com/geomind/mos_builder/"
+      pane name="ai" command="claude" cwd="~/github.com/geomind/mos_builder/"
+    }
+  }
+
+  tab name="nomad" {
+    pane
+  }
+}

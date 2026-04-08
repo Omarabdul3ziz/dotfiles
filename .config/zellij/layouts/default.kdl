@@ -20,21 +20,21 @@ layout {
             pane name="git" command="lazygit" cwd="~/github.com/threefoldtech/tfgrid-sdk-go"
         }
     }
-
-    tab name="vdc" {
-        pane stacked=true {
-            pane name="src" focus=true cwd="~/github.com/threefoldtech/kubecloud"
-            pane name="frontend" cwd="~/github.com/threefoldtech/kubecloud/frontend"
-            pane name="backend" cwd="~/github.com/threefoldtech/kubecloud/backend"
-            pane name="git" command="lazygit" cwd="~/github.com/threefoldtech/kubecloud"
-        }
-    }
+    //
+    // tab name="vdc" {
+    //     pane stacked=true {
+    //         pane name="src" focus=true cwd="~/github.com/threefoldtech/kubecloud"
+    //         pane name="frontend" cwd="~/github.com/threefoldtech/kubecloud/frontend"
+    //         pane name="backend" cwd="~/github.com/threefoldtech/kubecloud/backend"
+    //         pane name="git" command="lazygit" cwd="~/github.com/threefoldtech/kubecloud"
+    //     }
+    // }
 
     tab name="diatom" {
         pane stacked=true {
-            pane name="src" focus=true cwd="~/github.com/diatomcbt/dashboard"
-            pane name="backend" cwd="~/github.com/diatomcbt/dashboard/backend"
-            pane name="git" command="lazygit" cwd="~/github.com/diatomcbt/dashboard"
+            pane name="src" focus=true cwd="~/github.com/diatomCBT/codescalers"
+            pane name="backend" cwd="~/github.com/diatomCBT/codescalers/backend"
+            pane name="git" command="lazygit" cwd="~/github.com/diatomCBT/codescalers"
         }
     }
 

@@ -1,0 +1,40 @@
+layout {
+  cwd "/home/omar/github.com/threefoldtech/"
+
+  default_tab_template {
+    children
+    pane size=1 borderless=true {
+        plugin location="file:/home/omar/.config/zellij/plugins/statusbar.wasm"
+    }
+  }
+
+  tab name="src" {
+    pane stacked=true {
+      pane name="zosbase" cwd="~/github.com/threefoldtech/zosbase" command="nvim" { 
+        args "."
+      }
+      pane name="zos" cwd="~/github.com/threefoldtech/zos" command="nvim" { 
+        args "." 
+      }
+      pane name="zoslight" cwd="~/github.com/threefoldtech/zoslight" command="nvim" { 
+        args "." 
+      }
+    }
+  }
+
+  tab name="sh" {
+    pane stacked=true {
+      pane name="zosbase" cwd="~/github.com/threefoldtech/zosbase"
+      pane name="zos" cwd="~/github.com/threefoldtech/zos"
+      pane name="zoslight" cwd="~/github.com/threefoldtech/zoslight"
+    }
+  }
+
+  tab name="ai" cwd="/home/omar/github.com/threefoldtech/zosbase/" {
+    pane command="claude" 
+  }
+
+  tab name="remote" {
+    pane
+  }
+}

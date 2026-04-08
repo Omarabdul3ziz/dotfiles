@@ -19,3 +19,12 @@ Try new
 - [ ] stow, chezmoi, dotbot, nixHomeManager
 - [ ] usable VIM config
 ```
+
+# Simple way
+
+- `ln -s ~/github.com/Omarabdul3ziz/dotfiles/.config/zellij ~/.config/zellij`
+
+# Stow way
+
+- add all to ignore, uncomment only what you need
+- `stow -t ~ .`

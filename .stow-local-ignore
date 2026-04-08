@@ -1,3 +1,33 @@
+# === Shell Configuration ===
+.aliases
+.bashrc
+.env
+.profile
+.shellrc
+.zshrc
+
+# === Development Tools ===
+.gitconfig
+.tmux.conf
+lazyvim
+
+# === Terminal Applications ===
+.config/alacritty
+.config/ghostty
+
+# === Editors ===
+.config/helix
+
+# === Terminal Multiplexers ===
+# .config/zellij
+
+# === System Integration ===
+.local
+.local/share
+.local/share/applications
+.local/share/img
+
+# === Always Ignored ===
 .git
 .*/*.(md|sh|bak|nix)
-lazyvim
+Makefile

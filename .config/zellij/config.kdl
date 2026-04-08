@@ -3,14 +3,33 @@ theme "default"
 on_force_close "detach"
 default_shell "zsh"
 scrollback_editor "hx"
-copy_command "xclip -selection clipboard"
 simplified_ui false
 mouse_mode true
 pane_viewport_serialization false
 
 keybinds {
+    unbind "Ctrl b"
+
     normal {
         bind "Ctrl q" { Detach; }
+
+        unbind "Ctrl g"
+        bind "Ctrl u" { SwitchToMode "Locked"; }
+    }
+
+    shared_except "move" "locked" {
+        unbind "Ctrl h"
+        bind "Ctrl m" { SwitchToMode "Move"; }
+    }
+
+    shared_except "scroll" "locked" {
+        unbind "Ctrl s"
+        bind "Ctrl e" { SwitchToMode "Scroll"; }
+    }
+
+    locked {
+        unbind "Ctrl g"
+        bind "Ctrl u" { SwitchToMode "Normal"; }
     }
 }
 
