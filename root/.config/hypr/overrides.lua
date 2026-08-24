@@ -16,8 +16,8 @@ o.bind("SUPER + SHIFT + RETURN", "Herdr",
 
 -- Was: Herdr in the default terminal (foot), redundant with the binding above
 hl.unbind("SUPER + CTRL + RETURN")
-o.bind("SUPER + CTRL + RETURN", "Herdr (devbox1)",
-  'setsid uwsm-app -- ghostty -e herdr --remote omarz@devbox1')
+o.bind("SUPER + CTRL + RETURN", "Herdr (server)",
+  'setsid uwsm-app -- ghostty -e herdr --remote omarz@77.42.4.14 --remote-keybindings server')
 
 -- Captures
 o.bind("F8", "Screenshot", "omarchy-capture-screenshot")
