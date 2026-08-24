@@ -1,0 +1,22 @@
+#!/bin/sh
+# herdr-tab <label> <command...>
+# Open <command> in a new tab in the current workspace; reuse the tab if present.
+# Launched detached by herdr, so set a PATH we can rely on.
+set -e
+PATH="$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
+export PATH
+
+label=$1
+shift
+[ -n "$label" ] && [ $# -gt 0 ] || { echo "usage: herdr-tab <label> <command...>" >&2; exit 2; }
+
+existing=$(herdr tab list 2>/dev/null \
+  | jq -r --arg l "$label" '.result.tabs[]? | select(.label==$l) | .tab_id' | head -1)
+
+if [ -n "$existing" ]; then
+  herdr tab focus "$existing" >/dev/null
+  exit 0
+fi
+
+pane=$(herdr tab create --label "$label" --focus | jq -r '.result.root_pane.pane_id')
+herdr pane run "$pane" "$*; exit" >/dev/null

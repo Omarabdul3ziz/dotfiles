@@ -27,6 +27,9 @@ zoom             = "alt+f"        # zellij: pane-mode f ToggleFocusFullscreen
 close_pane       = "alt+x"        # zellij: pane-mode x
 # Pane focus stays on herdr's defaults: prefix+h/j/k/l
 
+# goto default is prefix+g, reclaimed below for lazygit.
+goto = "prefix+f"
+
 [ui]
 accent = "blue"
 sidebar_width = 34              # 26 truncates the agent session title (max 36)
@@ -38,7 +41,7 @@ pane_scrollbars = false
 confirm_close = false
 prompt_new_tab_name = false
 show_agent_labels_on_pane_borders = true
-agent_panel_sort = "spaces"
+agent_panel_sort = "priority"
 tab_bar_right = [{ type = "zoom" }, { type = "hostname" }]
 
 # Claude Code writes a content-derived OSC title per session; show it instead
@@ -52,3 +55,15 @@ rows = [["state_icon", "workspace", "branch", "git_status"]]
 
 [ui.toast]
 delivery = "terminal"
+
+# Review the diff, stage hunks, commit — without leaving the session.
+[[keys.command]]
+key = "prefix+g"
+type = "shell"
+command = "/home/omar/.local/bin/herdr-tab git lazygit"
+
+# Browse and read markdown (plans, docs) in a new tab.
+[[keys.command]]
+key = "prefix+m"
+type = "shell"
+command = "/home/omar/.local/bin/herdr-tab docs glow"
