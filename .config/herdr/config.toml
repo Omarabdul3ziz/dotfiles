@@ -25,7 +25,11 @@ split_vertical   = "alt+r"        # zellij: pane-mode r NewPane Right
 split_horizontal = "alt+d"        # zellij: pane-mode d NewPane Down
 zoom             = "alt+f"        # zellij: pane-mode f ToggleFocusFullscreen
 close_pane       = "alt+x"        # zellij: pane-mode x
-# Pane focus stays on herdr's defaults: prefix+h/j/k/l
+# Pane focus moves to the arrows; hjkl is freed for command bindings.
+focus_pane_left  = "prefix+left"
+focus_pane_down  = "prefix+down"
+focus_pane_up    = "prefix+up"
+focus_pane_right = "prefix+right"
 
 # goto default is prefix+g, reclaimed below for lazygit.
 goto = "prefix+f"
@@ -67,3 +71,9 @@ command = "/home/omar/.local/bin/herdr-tab git lazygit"
 key = "prefix+m"
 type = "shell"
 command = "/home/omar/.local/bin/herdr-tab docs glow"
+
+# Edit files in the current workspace without leaving the session.
+[[keys.command]]
+key = "prefix+h"
+type = "shell"
+command = "/home/omar/.local/bin/herdr-tab edit helix"
