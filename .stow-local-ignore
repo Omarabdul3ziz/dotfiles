@@ -27,9 +27,8 @@ lazyvim
 .local/share/applications
 .local/share/img
 
-# === Hyprland / Omarchy (backup only, not stowed) ===
+# === Hyprland (backup only, not stowed) ===
 .config/hypr
-.config/omarchy
 
 # === Always Ignored ===
 .git
