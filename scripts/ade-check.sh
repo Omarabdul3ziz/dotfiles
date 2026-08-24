@@ -25,11 +25,15 @@ grep -q 'new_cwd' "$cfg" 2>/dev/null && ok "new_cwd pinned" || warn "new_cwd not
 grep -q '^\[theme\]' "$cfg" 2>/dev/null && ok "theme pinned" || warn "theme not pinned"
 
 echo "notifications"
-[ -x "$HOME/.claude/hooks/herdr-notify.sh" ] && ok "herdr-notify.sh" || bad "herdr-notify.sh missing"
+# Herdr notifies on its own from pane state; a Claude-side hook doubles it.
+[ -e "$HOME/.claude/hooks/herdr-notify.sh" ] \
+  && bad "herdr-notify.sh is back -- it doubles herdr's built-in notification" \
+  || ok "no herdr-notify.sh"
 jq -e '[.hooks.Stop[]?.hooks[]?.command, .hooks.Notification[]?.hooks[]?.command]
-       | map(select(test("herdr-notify"))) | length == 2' \
+       | map(select(test("herdr-notify"))) | length == 0' \
   "$HOME/.claude/settings.json" >/dev/null 2>&1 \
-  && ok "Stop + Notification hooks wired" || bad "hooks not wired in ~/.claude/settings.json"
+  && ok "no duplicate notify hooks" || bad "herdr-notify wired in ~/.claude/settings.json"
+grep -q '^delivery' "$cfg" 2>/dev/null && ok "toast delivery set" || warn "ui.toast.delivery unset in $cfg"
 herdr integration status 2>/dev/null | grep -q '^claude: current' \
   && ok "herdr claude integration" || warn "herdr integration install claude"
 

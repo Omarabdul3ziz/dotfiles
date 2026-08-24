@@ -32,30 +32,6 @@
           }
         ]
       }
-    ],
-    "Stop": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "sh '/home/omar/.claude/hooks/herdr-notify.sh' stop",
-            "timeout": 5
-          }
-        ]
-      }
-    ],
-    "Notification": [
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "sh '/home/omar/.claude/hooks/herdr-notify.sh' attention",
-            "timeout": 5
-          }
-        ]
-      }
     ]
   },
   "statusLine": {

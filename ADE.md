@@ -311,58 +311,35 @@ width: 80
 all: false
 ```
 
-### 7. Notifications — `~/.claude/hooks/herdr-notify.sh`
+### 7. Notifications — built into Herdr
 
-Closes the loop: without it nothing tells you the agent is done, so the setup
-still needs you watching the `agent` tab. Mode `755`. Keep it *beside*
-`herdr-agent-state.sh` — herdr owns that file and overwrites it on every
-`herdr integration install claude`.
+No Claude-side hook is needed. Herdr detects agent state from the pane itself,
+using the rules manifest it keeps at
+`~/.local/state/herdr/agent-detection/status.toml` — regexes that match Claude's
+spinner and prompt to `working`, `idle`, and `blocker`. When a background
+workspace flips working -> idle it raises the toast and plays the done sound;
+`prefix+o` jumps to whichever pane raised it.
 
-```sh
-#!/bin/sh
-# herdr-notify.sh <stop|attention>
-# Raise a Herdr notification from a Claude hook so prefix+o jumps back to this
-# pane. Kept beside herdr-agent-state.sh, which herdr owns and overwrites.
-set -eu
+Configured in `~/.config/herdr/config.toml`:
 
-[ "${HERDR_ENV:-}" = "1" ] || exit 0
-command -v herdr >/dev/null 2>&1 || exit 0
+```toml
+[ui.toast]
+delivery = "terminal"   # off | herdr | terminal | system
 
-case "${1:-}" in
-  stop)      title="Claude finished"; sound=done ;;
-  attention) title="Claude needs you"; sound=request ;;
-  *) exit 0 ;;
-esac
-
-herdr notification show "$title" --sound "$sound" >/dev/null 2>&1 || true
+[ui.sound]
+# enabled = true
+# done_path    = "sounds/done.mp3"     # finished notifications
+# request_path = "sounds/request.mp3"  # needs-attention notifications
 ```
 
-Wire it into `~/.claude/settings.json` alongside the existing `SessionStart`
-hook:
+An earlier revision of this setup added `~/.claude/hooks/herdr-notify.sh` on the
+`Stop` and `Notification` hooks, from a time when nothing told you the agent was
+done. Herdr's integration has since caught up, so the hook now fires a *second*
+notification on top of the built-in one. It has been removed; do not reinstate
+it.
 
-```json
-{
-  "hooks": {
-    "Stop": [
-      { "matcher": "*", "hooks": [
-        { "type": "command", "command": "sh '$HOME/.claude/hooks/herdr-notify.sh' stop", "timeout": 5 }
-      ]}
-    ],
-    "Notification": [
-      { "matcher": "*", "hooks": [
-        { "type": "command", "command": "sh '$HOME/.claude/hooks/herdr-notify.sh' attention", "timeout": 5 }
-      ]}
-    ]
-  }
-}
-```
-
-`$HOME` must be expanded to a real path. `Stop` fires when the agent finishes a
-turn, `Notification` when it wants permission or input; `prefix+o` jumps to
-whichever pane raised the toast. The `HERDR_ENV` guard keeps Claude quiet when
-run outside herdr.
-
-Herdr's own agent-state integration should also be current:
+Keep herdr's own agent-state integration current — it reports the session ref so
+panes can resume, but it raises no notifications of its own:
 
 ```bash
 herdr integration status | grep '^claude:'   # want: current
