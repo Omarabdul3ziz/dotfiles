@@ -47,11 +47,6 @@ plugins {
     }
 }
 
-load_plugins {
-    // source https://github.com/alex35mil/dotfiles/blob/master/bin/zellij/statusbar/README.md
-    "file:/home/omar/.config/zellij/plugins/statusbar.wasm"
-}
-
 ui {
     pane_frames {
         rounded_corners true
