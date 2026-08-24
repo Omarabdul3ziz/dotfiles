@@ -15,8 +15,11 @@ Prefix is `ctrl+space`.
 | `prefix+m` | `docs`  | Glow    | read markdown — plans, specs |
 | `prefix+h` | `edit`  | Helix   | hand edits                   |
 
-Each key opens its tab, or refocuses it if already open. One tab per tool, never
-duplicates.
+Each key opens its tab, or refocuses it if already open. One tab per tool per
+workspace, never duplicates — open a second workspace and it gets its own set.
+
+The agent notifies when it finishes or needs you; `prefix+o` jumps to whichever
+pane asked.
 
 ## Tools
 
@@ -24,22 +27,26 @@ duplicates.
 - **Claude Code** — the agent.
 - **LazyGit** — git TUI, diffs rendered through delta.
 - **Glow** — markdown reader.
-- **Helix** — modal editor.
+- **Helix** — modal editor, and `$EDITOR`.
 
 ## Deps
 
 ```
-herdr  claude  lazygit  glow  helix  delta  jq
+herdr  claude  lazygit  glow  helix  delta  jq  git  python3
 ```
 
 `delta` renders diffs for both git and lazygit. `jq` is required by the
-`herdr-tab` helper.
+`herdr-tab` helper. `python3` is required by herdr's Claude integration hook
+(`~/.claude/hooks/herdr-agent-state.sh`) — without it the hook exits silently
+and herdr never learns the agent's state.
 
 ```bash
-for c in herdr claude lazygit glow helix delta jq; do
+for c in herdr claude lazygit glow helix delta jq git python3; do
   command -v "$c" >/dev/null || echo "missing: $c"
 done
 ```
+
+Or just `make ade-check`, which verifies the deps and everything below.
 
 ## Keybindings
 
@@ -63,8 +70,16 @@ done
 | `alt+x`        | close pane                   |
 | `prefix+arrows`| focus pane (hjkl is freed)   |
 | `prefix+f`     | goto (moved off `g`)         |
+| `prefix+e`     | edit scrollback in `$EDITOR` |
+| `prefix+o`     | jump to whatever notified you |
+| `prefix+w`     | workspace picker             |
+| `prefix+shift+g` | new git worktree           |
 | `prefix+shift+r` | reload config              |
 | `prefix+q`     | detach                       |
+
+`prefix+e` pipes the focused pane's scrollback into `$EDITOR` — the way to get
+agent output into helix. `prefix+o` is the other half of the notification loop
+below.
 
 ### Claude
 
@@ -114,24 +129,57 @@ label=$1
 shift
 [ -n "$label" ] && [ $# -gt 0 ] || { echo "usage: herdr-tab <label> <command...>" >&2; exit 2; }
 
+# Tab labels are unique only within a workspace, so every lookup must be scoped
+# to one -- otherwise a label match in another project steals focus to it.
+ws=${HERDR_WORKSPACE_ID:-}
+[ -n "$ws" ] || ws=$(herdr workspace list 2>/dev/null \
+  | jq -r '.result.workspaces[]? | select(.focused) | .workspace_id' | head -1)
+[ -n "$ws" ] || { echo "herdr-tab: no focused workspace" >&2; exit 1; }
+
 existing=$(herdr tab list 2>/dev/null \
-  | jq -r --arg l "$label" '.result.tabs[]? | select(.label==$l) | .tab_id' | head -1)
+  | jq -r --arg l "$label" --arg w "$ws" \
+      '.result.tabs[]? | select(.label==$l and .workspace_id==$w) | .tab_id' | head -1)
 
 if [ -n "$existing" ]; then
   herdr tab focus "$existing" >/dev/null
   exit 0
 fi
 
-pane=$(herdr tab create --label "$label" --focus | jq -r '.result.root_pane.pane_id')
+pane=$(herdr tab create --workspace "$ws" --label "$label" --focus \
+  | jq -r '.result.root_pane.pane_id')
+[ -n "$pane" ] && [ "$pane" != "null" ] || { echo "herdr-tab: tab create failed" >&2; exit 1; }
+
+# Args are joined into a single shell string: pass a command line, not an argv.
 herdr pane run "$pane" "$*; exit" >/dev/null
 ```
 
+Tab labels are unique only per workspace, so the lookup is scoped to the
+focused one — an unscoped match would yank focus into another project.
+
 ### 2. Herdr — `~/.config/herdr/config.toml`
 
-`prefix+g` and `prefix+h` are taken by herdr defaults (`goto`, `focus_pane_left`),
-so both are reclaimed first.
+Three of the four command keys collide with herdr defaults — `prefix+c` is
+`new_tab`, `prefix+g` is `goto`, `prefix+h` is `focus_pane_left` — so each is
+reclaimed (to `alt+n`, `prefix+f`, and `prefix+left`) before being rebound.
+
+`new_cwd = "follow"` is load-bearing: it is what makes `prefix+g` open lazygit
+in the repo you are actually working in rather than `$HOME`.
 
 ```toml
+onboarding = false
+
+[theme]
+name = "one-dark"
+
+auto_switch = false
+[theme.custom]
+panel_bg = "black"
+
+[terminal]
+# New tabs inherit the source workspace's cwd -- this is what makes prefix+g
+# open lazygit in the repo you are actually working in.
+new_cwd = "follow"
+
 [keys]
 prefix = "ctrl+space"
 
@@ -144,12 +192,12 @@ previous_workspace = ["alt+shift+k", "alt+shift+up"]
 next_workspace     = ["alt+shift+j", "alt+shift+down"]
 switch_tab         = "alt+1..9"
 
+# Acting on the current pane.
 new_tab          = "alt+n"
-split_vertical   = "alt+r"
-split_horizontal = "alt+d"
-zoom             = "alt+f"
-close_pane       = "alt+x"
-
+split_vertical   = "alt+r"        # zellij: pane-mode r NewPane Right
+split_horizontal = "alt+d"        # zellij: pane-mode d NewPane Down
+zoom             = "alt+f"        # zellij: pane-mode f ToggleFocusFullscreen
+close_pane       = "alt+x"        # zellij: pane-mode x
 # Pane focus moves to the arrows; hjkl is freed for command bindings.
 focus_pane_left  = "prefix+left"
 focus_pane_down  = "prefix+down"
@@ -159,30 +207,63 @@ focus_pane_right = "prefix+right"
 # goto default is prefix+g, reclaimed below for lazygit.
 goto = "prefix+f"
 
-[[keys.command]]
-key = "prefix+c"
-type = "shell"
-command = "/home/omar/.local/bin/herdr-tab agent claude"
+[ui]
+accent = "blue"
+sidebar_width = 34              # 26 truncates the agent session title (max 36)
+status_indicators = "symbols"   # state by glyph, not colour alone
+redraw_on_focus_gained = false  # no flash when returning from another Hyprland window
+pane_gaps = false
+pane_outer_borders = false
+pane_scrollbars = false
+confirm_close = false
+prompt_new_tab_name = false
+show_agent_labels_on_pane_borders = true
+agent_panel_sort = "priority"
+tab_bar_right = [{ type = "zoom" }, { type = "hostname" }]
 
+# Claude Code writes a content-derived OSC title per session; show it instead
+# of a generic "claude" label so agents are identified by what they're doing.
+[ui.sidebar.agents.rows_by_agent]
+claude = [["state_icon", "workspace", "terminal_title_stripped"]]
+
+# Spaces on one line too, mirroring the agent row: status, where, what.
+[ui.sidebar.spaces]
+rows = [["state_icon", "workspace", "branch", "git_status"]]
+
+[ui.toast]
+delivery = "terminal"
+
+# Review the diff, stage hunks, commit — without leaving the session.
 [[keys.command]]
 key = "prefix+g"
 type = "shell"
 command = "/home/omar/.local/bin/herdr-tab git lazygit"
 
+# Browse and read markdown (plans, docs) in a new tab.
 [[keys.command]]
 key = "prefix+m"
 type = "shell"
 command = "/home/omar/.local/bin/herdr-tab docs glow"
 
+# Edit files in the current workspace without leaving the session.
 [[keys.command]]
 key = "prefix+h"
 type = "shell"
 command = "/home/omar/.local/bin/herdr-tab edit helix"
+
+# The agent itself, on the same open-or-refocus pattern as the rest.
+[[keys.command]]
+key = "prefix+c"
+type = "shell"
+command = "/home/omar/.local/bin/herdr-tab agent claude"
 ```
 
 Paths in `command` must be absolute.
 
 ### 3. Claude — `~/.claude/settings.json`
+
+Merge these keys into the existing file — do not replace it, it also carries
+hooks, statusline, and plugin settings.
 
 ```json
 {
@@ -230,25 +311,139 @@ width: 80
 all: false
 ```
 
+### 7. Notifications — `~/.claude/hooks/herdr-notify.sh`
+
+Closes the loop: without it nothing tells you the agent is done, so the setup
+still needs you watching the `agent` tab. Mode `755`. Keep it *beside*
+`herdr-agent-state.sh` — herdr owns that file and overwrites it on every
+`herdr integration install claude`.
+
+```sh
+#!/bin/sh
+# herdr-notify.sh <stop|attention>
+# Raise a Herdr notification from a Claude hook so prefix+o jumps back to this
+# pane. Kept beside herdr-agent-state.sh, which herdr owns and overwrites.
+set -eu
+
+[ "${HERDR_ENV:-}" = "1" ] || exit 0
+command -v herdr >/dev/null 2>&1 || exit 0
+
+case "${1:-}" in
+  stop)      title="Claude finished"; sound=done ;;
+  attention) title="Claude needs you"; sound=request ;;
+  *) exit 0 ;;
+esac
+
+herdr notification show "$title" --sound "$sound" >/dev/null 2>&1 || true
+```
+
+Wire it into `~/.claude/settings.json` alongside the existing `SessionStart`
+hook:
+
+```json
+{
+  "hooks": {
+    "Stop": [
+      { "matcher": "*", "hooks": [
+        { "type": "command", "command": "sh '$HOME/.claude/hooks/herdr-notify.sh' stop", "timeout": 5 }
+      ]}
+    ],
+    "Notification": [
+      { "matcher": "*", "hooks": [
+        { "type": "command", "command": "sh '$HOME/.claude/hooks/herdr-notify.sh' attention", "timeout": 5 }
+      ]}
+    ]
+  }
+}
+```
+
+`$HOME` must be expanded to a real path. `Stop` fires when the agent finishes a
+turn, `Notification` when it wants permission or input; `prefix+o` jumps to
+whichever pane raised the toast. The `HERDR_ENV` guard keeps Claude quiet when
+run outside herdr.
+
+Herdr's own agent-state integration should also be current:
+
+```bash
+herdr integration status | grep '^claude:'   # want: current
+herdr integration install claude             # if not
+```
+
+### 8. Editor — `$EDITOR`
+
+`prefix+e` (edit scrollback) and git both open `$EDITOR`, so it should be the
+same editor the `edit` tab runs:
+
+```sh
+# ~/.config/uwsm/default
+export EDITOR=helix
+```
+
+Requires a re-login — it is session env, not shell env. On Omarchy this file is
+managed, so an upgrade can revert it; `make ade-check` catches that.
+
+## Sessions and remotes
+
+The ADE lives in one persistent herdr session, `default` — bare `herdr` launches
+or attaches it, `prefix+q` detaches, nothing is lost.
+
+```bash
+herdr                       # launch or attach the default session
+herdr session list          # what's running
+herdr --session review      # a second, independent session
+herdr session attach review
+herdr --remote user@host    # attach a herdr server over SSH
+```
+
+Named sessions make attach deterministic when more than one is running, and are
+what `--remote` addresses. `--remote-keybindings local|server` decides whose
+keymap wins; the default `local` keeps this one.
+
+## Agents driving the environment
+
+Herdr is scriptable over its socket, and the agent is inside it — everything the
+keys do, Claude can do:
+
+```bash
+herdr --skill                          # the agent-facing skill file
+herdr tab create --label test --focus
+herdr agent list                       # every agent pane, with state
+herdr agent read <id>                  # read another agent's output
+herdr agent prompt <id> "..."          # hand it work
+herdr agent wait <id> --state idle     # block until it's done
+```
+
+`herdr agent wait` plus `herdr agent read` is the primitive for one agent
+supervising another. Panes carry `HERDR_ENV=1`, `HERDR_PANE_ID`,
+`HERDR_TAB_ID`, and `HERDR_WORKSPACE_ID`, so a script can always locate itself —
+that is how `herdr-tab` scopes its lookup.
+
 ## Agent instructions
 
 To bring this up on a fresh machine:
 
 1. Install the deps. Verify with the loop under **Deps** — stop if any are missing.
 2. Write `~/.local/bin/herdr-tab`, then `chmod 755`. Confirm `~/.local/bin` is on `PATH`.
-3. Write the five config files above. Replace `/home/omar` with the real `$HOME`
-   in every `keys.command` — herdr requires absolute paths.
+3. Write the config files above. Replace `/home/omar` and `$HOME` with the real
+   home directory in every `keys.command` and hook command — herdr requires
+   absolute paths, and Claude's hooks do not expand `$HOME`.
 4. Validate herdr: `herdr config check` — must print `config: ok`. It reads
    `~/.config/herdr/config.toml`, so write there, not just into a dotfiles repo.
 5. Apply: `herdr server reload-config`, or `prefix+shift+r` in a live session.
 6. Test all four keys. Press twice each — the second press must refocus the
-   existing tab, not open a second one.
+   existing tab, not open a second one. Then open a second workspace and repeat:
+   the keys must act on that workspace, not jump back to the first.
+7. Run `make ade-check` — it must end in `ADE: ok`.
 
 Rules:
 
-- Never bind over a herdr default without reclaiming it first. `prefix+g` is
-  `goto`; `prefix+h` is `focus_pane_left`. Check `herdr --default-config` before
-  claiming any key.
+- Never bind over a herdr default without reclaiming it first. `prefix+c` is
+  `new_tab`, `prefix+g` is `goto`, `prefix+h` is `focus_pane_left` — all three
+  are reclaimed here. Check `herdr --default-config` before claiming any key.
+- Never edit `~/.claude/hooks/herdr-agent-state.sh`; herdr overwrites it on
+  every integration install. Add hooks beside it.
+- Merge into `~/.claude/settings.json`, never overwrite it — it also holds
+  hooks, statusline, permissions, and plugin settings.
 - If `~/.config/herdr` is a real directory rather than a symlink, edits to a
   dotfiles copy do nothing until copied across.
 - `herdr config check` validates the live file only. It passing does not mean a

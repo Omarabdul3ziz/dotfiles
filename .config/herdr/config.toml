@@ -7,6 +7,11 @@ auto_switch = false
 [theme.custom]
 panel_bg = "black"
 
+[terminal]
+# New tabs inherit the source workspace's cwd -- this is what makes prefix+g
+# open lazygit in the repo you are actually working in.
+new_cwd = "follow"
+
 [keys]
 prefix = "ctrl+space"
 
@@ -77,3 +82,9 @@ command = "/home/omar/.local/bin/herdr-tab docs glow"
 key = "prefix+h"
 type = "shell"
 command = "/home/omar/.local/bin/herdr-tab edit helix"
+
+# The agent itself, on the same open-or-refocus pattern as the rest.
+[[keys.command]]
+key = "prefix+c"
+type = "shell"
+command = "/home/omar/.local/bin/herdr-tab agent claude"

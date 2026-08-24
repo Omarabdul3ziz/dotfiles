@@ -3,3 +3,6 @@ apply:
 
 delete:
 	stow -D .
+
+ade-check:
+	@sh scripts/ade-check.sh
