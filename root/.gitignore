@@ -1,3 +1,4 @@
 .env
 .cursor
+.agents
 zos/go.work*

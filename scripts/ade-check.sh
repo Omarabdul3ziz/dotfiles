@@ -42,8 +42,8 @@ esac
 
 echo "stow"
 if command -v stow >/dev/null 2>&1; then
-  if stow -n -t "$HOME" . >/dev/null 2>&1; then ok "no conflicts"
-  else warn "make apply would conflict -- run: stow --adopt -t ~ ."; fi
+  if stow -n -t "$HOME" root >/dev/null 2>&1; then ok "no conflicts"
+  else warn "make apply would conflict -- run: stow --adopt -t ~ root"; fi
 fi
 
 echo

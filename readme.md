@@ -5,7 +5,7 @@
 portable configurations/settings for my services/dependancis.
 
 **Usage**
-$ stow -t <home> . || stow -D .
+$ make apply || make delete
 
 **Todo**
 Be Portable as Possible
@@ -20,11 +20,17 @@ Try new
 - [ ] usable VIM config
 ```
 
-# Simple way
+# Layout
 
-- `ln -s ~/github.com/Omarabdul3ziz/dotfiles/.config/zellij ~/.config/zellij`
+Everything under `root/` is the `$HOME` tree — `root/.config/herdr/config.toml`
+becomes `~/.config/herdr/config.toml`. The repo root holds docs, `Makefile`, and
+`scripts/`, none of which are ever linked out.
 
-# Stow way
+```
+make apply    # stow -t ~ root
+make delete   # stow -D -t ~ root
+make ade-check
+```
 
-- add all to ignore, uncomment only what you need
-- `stow -t ~ .`
+`root/.stow-local-ignore` lists what inside `root/` stays unlinked; comment a
+line out to activate it.
