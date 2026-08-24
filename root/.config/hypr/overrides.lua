@@ -11,8 +11,13 @@ o.bind("SUPER + SHIFT + G", "Telegram", { launch = "AyuGram", focus = "^AyuGram$
 
 -- Was: Browser
 hl.unbind("SUPER + SHIFT + RETURN")
-o.bind("SUPER + SHIFT + RETURN", "Zellij",
-  'uwsm-app -- xdg-terminal-exec --dir="$(omarchy-cmd-terminal-cwd)" zellij a mine')
+o.bind("SUPER + SHIFT + RETURN", "Herdr",
+  'setsid uwsm-app -- ghostty --working-directory="$(omarchy-cmd-terminal-cwd)" -e herdr')
+
+-- Was: Herdr in the default terminal (foot), redundant with the binding above
+hl.unbind("SUPER + CTRL + RETURN")
+o.bind("SUPER + CTRL + RETURN", "Herdr (devbox1)",
+  'setsid uwsm-app -- ghostty -e herdr --remote omarz@devbox1')
 
 -- Captures
 o.bind("F8", "Screenshot", "omarchy-capture-screenshot")
