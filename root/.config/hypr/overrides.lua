@@ -59,6 +59,10 @@ hl.config({
 
     touchpad = {
       scroll_factor = 0.4,
+
+      -- Omarchy 4 turned this on, making right-click a two-finger click.
+      -- false restores button areas: press the lower-right corner to right-click.
+      clickfinger_behavior = false,
     },
   },
 })
