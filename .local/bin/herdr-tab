@@ -1,7 +1,6 @@
 #!/bin/sh
 # herdr-tab <label> <command...>
 # Open <command> in a new tab in the current workspace; reuse the tab if present.
-# Launched detached by herdr, so set a PATH we can rely on.
 set -e
 PATH="$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
 export PATH
@@ -10,13 +9,25 @@ label=$1
 shift
 [ -n "$label" ] && [ $# -gt 0 ] || { echo "usage: herdr-tab <label> <command...>" >&2; exit 2; }
 
+# Tab labels are unique only within a workspace, so every lookup must be scoped
+# to one -- otherwise a label match in another project steals focus to it.
+ws=${HERDR_WORKSPACE_ID:-}
+[ -n "$ws" ] || ws=$(herdr workspace list 2>/dev/null \
+  | jq -r '.result.workspaces[]? | select(.focused) | .workspace_id' | head -1)
+[ -n "$ws" ] || { echo "herdr-tab: no focused workspace" >&2; exit 1; }
+
 existing=$(herdr tab list 2>/dev/null \
-  | jq -r --arg l "$label" '.result.tabs[]? | select(.label==$l) | .tab_id' | head -1)
+  | jq -r --arg l "$label" --arg w "$ws" \
+      '.result.tabs[]? | select(.label==$l and .workspace_id==$w) | .tab_id' | head -1)
 
 if [ -n "$existing" ]; then
   herdr tab focus "$existing" >/dev/null
   exit 0
 fi
 
-pane=$(herdr tab create --label "$label" --focus | jq -r '.result.root_pane.pane_id')
+pane=$(herdr tab create --workspace "$ws" --label "$label" --focus \
+  | jq -r '.result.root_pane.pane_id')
+[ -n "$pane" ] && [ "$pane" != "null" ] || { echo "herdr-tab: tab create failed" >&2; exit 1; }
+
+# Args are joined into a single shell string: pass a command line, not an argv.
 herdr pane run "$pane" "$*; exit" >/dev/null
