@@ -26,6 +26,7 @@ switch_tab         = "alt+1..9"
 
 # Acting on the current pane.
 new_tab          = "alt+n"
+new_workspace    = "alt+shift+n"
 split_vertical   = "alt+r"        # zellij: pane-mode r NewPane Right
 split_horizontal = "alt+d"        # zellij: pane-mode d NewPane Down
 zoom             = "alt+f"        # zellij: pane-mode f ToggleFocusFullscreen
@@ -83,8 +84,9 @@ key = "prefix+h"
 type = "shell"
 command = "/home/omar/.local/bin/herdr-tab edit helix"
 
-# The agent itself, on the same open-or-refocus pattern as the rest.
+# A fresh agent every time -- -n skips the reuse lookup, so repeated presses
+# stack up parallel sessions instead of refocusing the first one.
 [[keys.command]]
 key = "prefix+c"
 type = "shell"
-command = "/home/omar/.local/bin/herdr-tab agent claude"
+command = "/home/omar/.local/bin/herdr-tab -n agent claude"
