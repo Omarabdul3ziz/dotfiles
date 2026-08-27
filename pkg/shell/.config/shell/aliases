@@ -1,0 +1,6 @@
+# `alias name=value` parses identically in bash, zsh and fish -- keep it to
+# that one form. Anything needing real logic goes in a script under ~/scripts.
+alias lg='lazygit'
+alias ld='lazydocker'
+alias gs='git status --short --branch'
+alias gtdb='git branch --merged | grep -v "^\*" | xargs -r git branch -d'

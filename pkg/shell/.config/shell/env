@@ -1,0 +1,6 @@
+# Shared environment. KEY=value only -- no `export`, no shell syntax, no
+# command substitution. Parsed by bash, zsh and fish alike.
+# Secrets do NOT belong here; put them in ~/.env, which is gitignored.
+EDITOR=nvim
+VISUAL=nvim
+PAGER=less

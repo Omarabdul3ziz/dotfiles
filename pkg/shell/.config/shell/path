@@ -1,0 +1,7 @@
+# One directory per line, prepended in order. $HOME expands; missing dirs
+# are skipped silently, so this file is safe to share across machines.
+$HOME/.cargo/bin
+/usr/local/go/bin
+$HOME/go/bin
+$HOME/hero/bin
+$HOME/.local/bin
