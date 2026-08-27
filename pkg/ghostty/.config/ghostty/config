@@ -1,40 +1,69 @@
-# fonts
-font-size = 12
-font-style = medium
-bold-is-bright = true
-theme = catppuccin-mocha
-font-family = "JetBrainsMono Nerd Font Mono"
+# Dynamic theme colors
+config-file = ?"~/.local/state/omarchy/current/theme/ghostty.conf"
 
-# cursor
-cursor-style = block
-# cursor-style-blink = false
+# Font
+font-family = "JetBrainsMono Nerd Font"
+font-style = Regular
+font-size = 9
 
-# clipboard
-# copy-on-select = clipboard
-clipboard-trim-trailing-spaces = true
-
-# mouse
-mouse-scroll-multiplier = 2
-mouse-hide-while-typing = true
-
-# window
-initial-window = true
+# Window
+window-theme = ghostty
+window-padding-x = 14
+window-padding-y = 14
+confirm-close-surface=false
 resize-overlay = never
-window-save-state = always
-window-step-resize = false
-window-decoration = none
-gtk-titlebar = false
-window-padding-x = 5
-window-padding-y = 5
-window-padding-balance = true
+gtk-toolbar-style = flat
 
-# behavior
-auto-update = check
-auto-update-channel = stable
-quit-after-last-window-closed = true
-shell-integration-features = true
+# Cursor styling
+cursor-style = "block"
+cursor-style-blink = false
 
-# misc
+# Cursor styling + SSH session terminfo
+# (all shell integration options must be passed together)
+shell-integration-features = no-cursor,ssh-env
+
+# Keyboard bindings
+keybind = shift+insert=paste_from_clipboard
+keybind = control+insert=copy_to_clipboard
+# Send Shift+Enter as CSI-u so TUIs can distinguish it from Enter.
+keybind = shift+enter=csi:13;2u
+# Legacy encoding sends Alt+Shift+Enter the same as Alt+Enter; send CSI-u so tmux can match M-S-Enter.
+keybind = alt+shift+enter=csi:13;4u
+keybind = super+control+shift+alt+arrow_down=resize_split:down,100
+keybind = super+control+shift+alt+arrow_up=resize_split:up,100
+keybind = super+control+shift+alt+arrow_left=resize_split:left,100
+keybind = super+control+shift+alt+arrow_right=resize_split:right,100
+
+# Slowdown mouse scrolling
+mouse-scroll-multiplier = 0.95
+
+# Fix general slowness on hyprland (https://github.com/ghostty-org/ghostty/discussions/3224)
+async-backend = epoll
+
+command = /usr/bin/fish
+
+# --- Yield the multiplexer keymap to Herdr ---------------------------------
+# Herdr owns splits, tabs, and zoom; Ghostty's equivalents only shadowed it.
+# Unbinding frees ctrl+alt+* and alt+1..9 so those chords reach Herdr instead.
+
+# Splits -> Herdr panes
+keybind = ctrl+alt+arrow_left=unbind
+keybind = ctrl+alt+arrow_right=unbind
+keybind = ctrl+alt+arrow_up=unbind
+keybind = ctrl+alt+arrow_down=unbind
+keybind = ctrl+shift+e=unbind
+keybind = ctrl+shift+o=unbind
+keybind = ctrl+shift+enter=unbind
+
+# Tabs -> Herdr tabs
+keybind = ctrl+shift+t=unbind
+keybind = ctrl+shift+w=unbind
+keybind = ctrl+tab=unbind
+keybind = ctrl+shift+tab=unbind
+keybind = ctrl+page_up=unbind
+keybind = ctrl+page_down=unbind
+keybind = ctrl+shift+arrow_left=unbind
+keybind = ctrl+shift+arrow_right=unbind
 keybind = alt+one=unbind
 keybind = alt+two=unbind
 keybind = alt+three=unbind
@@ -44,3 +73,12 @@ keybind = alt+six=unbind
 keybind = alt+seven=unbind
 keybind = alt+eight=unbind
 keybind = alt+nine=unbind
+keybind = alt+digit_1=unbind
+keybind = alt+digit_2=unbind
+keybind = alt+digit_3=unbind
+keybind = alt+digit_4=unbind
+keybind = alt+digit_5=unbind
+keybind = alt+digit_6=unbind
+keybind = alt+digit_7=unbind
+keybind = alt+digit_8=unbind
+keybind = alt+digit_9=unbind

@@ -25,6 +25,10 @@ o.bind("ALT + F8", "Screenrecording", "omarchy-menu screenrecord")
 o.bind("SUPER + F8", "Color picker", "pkill hyprpicker || hyprpicker -a")
 o.bind("SUPER + CTRL + F8", "Extract text (OCR) from screenshot", "omarchy-capture-text-extraction")
 
+-- Toggl
+o.bind("SUPER + SHIFT + T", "Toggl start/stop", "omarchy-toggl toggle")
+o.bind("SUPER + ALT + T", "Toggl pick entry", "omarchy-toggl pick")
+
 -- Look and feel ---------------------------------------------------------------
 
 hl.config({

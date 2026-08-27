@@ -13,8 +13,8 @@ import qs.Ui
 // QML off `current.start`, so it stays live between refreshes.
 Panel {
   id: root
-  moduleName: "omar.toggl"
-  ipcTarget: "omar.toggl"
+  moduleName: "io.github.omarabdul3ziz.toggl"
+  ipcTarget: "io.github.omarabdul3ziz.toggl"
 
   readonly property color foreground: bar ? bar.foreground : Color.foreground
   readonly property color urgent: bar ? bar.urgent : Color.urgent
