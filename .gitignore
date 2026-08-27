@@ -5,3 +5,8 @@ root/.env
 **/.env
 root/.config/omarchy/toggl.env
 **/toggl.env
+
+# secrets never get tracked, encrypted or not
+secrets/
+*.gpg
+*.age

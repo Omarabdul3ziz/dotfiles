@@ -11,7 +11,7 @@ PKGS := core shell fish claude desktop herdr ghostty nvim helix tui
 # ~/.config/hypr) would end up writing into git.
 STOW := stow --no-folding -d pkg -t $(HOME)
 
-.PHONY: apply delete adopt on off list ade-check toggl print-pkgs
+.PHONY: apply delete adopt on off list ade-check toggl print-pkgs env-backup env-restore
 
 apply:                      ## link PKGS into $HOME (idempotent, prunes stale links)
 	@$(STOW) -R $(PKGS)
@@ -37,6 +37,23 @@ list:                       ## show every package and whether it is active
 	@for p in $$(ls pkg); do \
 	  case " $(PKGS) " in *" $$p "*) echo "  on   $$p" ;; *) echo "  off  $$p" ;; esac; \
 	done
+
+# ~/.env is never tracked, encrypted or not -- this repo is public. These write
+# to a path you pass in: a password manager, an external drive, a private repo.
+env-backup:                 ## make env-backup DEST=/path/env.gpg
+	@test -n "$(DEST)" || { echo "usage: make env-backup DEST=/path/env.gpg" >&2; exit 2; }
+	@case "$(abspath $(DEST))" in "$(CURDIR)"/*) \
+	  echo "refusing: $(DEST) is inside the repo" >&2; exit 2 ;; esac
+	@test -s "$(HOME)/.env" || { echo "no ~/.env to back up" >&2; exit 1; }
+	@gpg --symmetric --cipher-algo AES256 --yes --output "$(DEST)" "$(HOME)/.env"
+	@echo "wrote $(DEST)"
+
+env-restore:                ## make env-restore SRC=/path/env.gpg
+	@test -n "$(SRC)" || { echo "usage: make env-restore SRC=/path/env.gpg" >&2; exit 2; }
+	@test ! -e "$(HOME)/.env" || { echo "~/.env exists -- move it first" >&2; exit 1; }
+	@gpg --decrypt --output "$(HOME)/.env" "$(SRC)"
+	@chmod 600 "$(HOME)/.env"
+	@echo "~/.env restored (mode 600)"
 
 ade-check:
 	@sh scripts/ade-check.sh
