@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "id": "omar.toggl",
+  "name": "Toggl Track",
+  "version": "1.0.0",
+  "author": "Omar",
+  "license": "MIT",
+  "description": "Toggl Track timer with today/week totals, project breakdown, and one-click resume.",
+  "kinds": [
+    "bar-widget"
+  ],
+  "entryPoints": {
+    "barWidget": "Panel.qml"
+  },
+  "barWidget": {
+    "displayName": "Toggl Track",
+    "description": "Running timer, today and week totals, per-project breakdown, and recent entries to resume.",
+    "category": "Time",
+    "allowMultiple": false,
+    "defaultSection": "right",
+    "defaults": {
+      "refreshIntervalSec": 30,
+      "timeFormat": "hh:mm"
+    },
+    "schema": [
+      {
+        "key": "refreshIntervalSec",
+        "type": "integer",
+        "label": "Panel refresh (seconds)",
+        "description": "How often the open panel recomputes totals. Local only - no API calls.",
+        "min": 5,
+        "max": 300,
+        "step": 5,
+        "defaultValue": 30
+      },
+      {
+        "key": "timeFormat",
+        "type": "enum",
+        "label": "Bar time format",
+        "description": "How the running timer is shown in the bar. Seconds always show in the panel.",
+        "options": [
+          "hh:mm",
+          "hh:mm:ss",
+          "icon only"
+        ],
+        "defaultValue": "hh:mm"
+      }
+    ]
+  }
+}

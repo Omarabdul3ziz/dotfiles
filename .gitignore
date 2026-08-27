@@ -1,0 +1,7 @@
+
+# secrets - never commit
+.env
+root/.env
+**/.env
+root/.config/omarchy/toggl.env
+**/toggl.env
