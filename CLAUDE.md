@@ -1,63 +1,86 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+Guidance for Claude Code (claude.ai/code) working in this repository.
 
 ## What this repo is
 
-Personal dotfiles managed with **GNU Stow**.
+Personal dotfiles managed with **GNU Stow**, one package per tool.
 
-**`root/` is the `$HOME` tree.** Everything that gets linked into `~` lives at its
-`$HOME`-relative path under `root/` — `root/.tmux.conf` → `~/.tmux.conf`,
-`root/.config/zellij/` → `~/.config/zellij/`. `stow` is pointed at `root/` as its
-one package, so nothing else in the repo can leak into `$HOME`.
+**Every directory under `pkg/` is a `$HOME` tree.** A file's path inside its
+package is its path in `$HOME`: `pkg/herdr/.config/herdr/config.toml` becomes
+`~/.config/herdr/config.toml`. Which packages are actually linked is the `PKGS`
+line at the top of the `Makefile` — that line is the profile.
 
-The repo root is for the repo: docs (`ADE.md`, `readme.md`, `setup*.md`),
-`Makefile`, `setup.sh`, `scripts/` (repo tooling), and `.claude/CLAUDE.md`
-(project instructions). Add docs and repo files here freely — they are outside
-the stow package and can never collide with a `$HOME` path.
+Everything under `pkg/` is tracked. Only what `PKGS` lists is linked. That is
+how alternatives for the same job coexist: `zellij`, `tmux` and `herdr` are all
+in the repo, only `herdr` is on.
 
-Two pairs look like duplicates and are not:
-
-| Repo root | `root/` |
-| --- | --- |
-| `.claude/CLAUDE.md` — project instructions for this repo | `root/.claude/` — the real `~/.claude` (settings, hooks, skills, statusline) |
-| `scripts/ade-check.sh` — repo tooling, run by `make` | `root/scripts/` — becomes `~/scripts` |
+The repo root is for the repo: docs, `Makefile`, `scripts/` (repo tooling),
+`env.example`. Nothing there is ever linked into `$HOME`.
 
 ## Common commands
 
 ```bash
-make apply     # stow -t ~ root    (symlink everything not ignored into $HOME)
-make delete    # stow -D -t ~ root (remove the symlinks)
-make ade-check # verify the ADE is installed on this machine (see ADE.md)
+make apply           # stow -R the PKGS list into ~   (idempotent, prunes stale links)
+make delete          # unlink them
+make adopt           # one-time: pull existing ~ files into the repo, then link
+make on  PKG=zellij  # activate one package
+make off PKG=herdr   # deactivate one package
+make list            # every package, on or off
+make ade-check       # verify the ADE is installed on this machine (see ADE.md)
+make toggl           # reinstall the Toggl bar widget after an Omarchy update
 ```
 
-`setup.sh` is an interactive installer that bootstraps tools (apt, snap, rustup, nvm, nix, go tools, group memberships) on a fresh machine. It is not idempotent for config — it only installs binaries.
+`make apply` is safe to re-run. Stow refuses rather than clobbers: if a target
+exists as a real file it aborts the whole run, and the fix is `make adopt`.
 
-## Stow ignore is the source of truth for what is "active"
+`--no-folding` is deliberate. Without it stow symlinks whole directories, and a
+vendor-owned dir like `~/.config/omarchy/plugins/` would end up being written
+into by Omarchy *through* the symlink, inside git. Per-file links cost one
+`make apply` after adding a file; that is the trade.
 
-`root/.stow-local-ignore` lists everything inside `root/` that **won't** be linked. Most entries are commented in (= ignored). To enable a file/dir, **comment out** its line. Paths in it are relative to `root/`, not the repo. If asked to "enable" a config (alacritty, helix, tmux, etc.), edit `root/.stow-local-ignore`, do not move files.
+## Only track what you actually override
 
-Note `.local` is currently ignored, so `root/.local/bin/herdr-tab` is tracked but never linked — the ADE's helper has to be installed by hand until that line is commented out.
+Omarchy, LazyVim and herdr all ship their own config into `$HOME`. Do not track
+those files. Track the override, or the script that re-applies it.
 
-After changing what's ignored, restow: `make delete && make apply`.
+- `~/.config/hypr/*.lua` — the four files here are pure overrides (`o.bind`,
+  `hl.unbind`) layered on Omarchy's defaults. Tracked.
+- `~/.config/omarchy/shell.json` — Omarchy owns and rewrites it on upgrade.
+  **Not tracked.** `scripts/omarchy-toggl-install.sh` jq-merges the bar entry
+  back instead, so a newer Omarchy's widgets survive.
+- `~/.claude/hooks/*` — installed by `herdr integration install` and the
+  codebase-memory MCP. **Not tracked**; `ade-check` verifies they exist.
+- `~/.config/nvim/lua/plugins/theme.lua` — an Omarchy symlink into
+  `~/.local/state/omarchy/current/theme/`. **Not tracked**, recreated on theme
+  switch.
 
-## Layout
+When something new appears under a vendor-managed directory, ask whether it is
+yours before adding it.
 
-- `root/.config/zellij/` — actively edited. `config.kdl`, `layouts/` (per-project workspaces), `themes/`, `plugins/statusbar.wasm` (third-party WASM plugin loaded via absolute path in `config.kdl`).
-- `root/.config/{alacritty,ghostty,helix}/` — present but ignored by stow.
-- `root/lazyvim/` — full LazyVim distro. Symlinked into `root/.config/nvim` via the in-repo symlink `root/.config/nvim -> ../lazyvim`, so stowing `.config/nvim` is what activates it (also currently ignored).
-- `root/.tmux.conf` — uses `M-a` as prefix (not `C-b`), Alt-based pane/window nav, TPM auto-bootstrap.
-- `root/scripts/crafttab.sh` — defines a `crafttab` shell function that writes an ephemeral KDL layout to `/tmp` and runs `zellij action new-tab --layout`. Source pattern to follow when adding similar helpers.
+## Shell config is shared across bash, zsh and fish
 
-## Zellij layout conventions
+Fish is the login shell. `~/.config/shell/` holds the parts all three agree on:
 
-Layouts under `root/.config/zellij/layouts/` follow a consistent shape: a top-level `default_tab_template` injects the `statusbar.wasm` plugin pane, then each `tab` contains a `pane stacked=true { ... }` with one child per repo/role. **Each child pane needs its own `cwd`** — `stacked=true` belongs on the parent wrapper, not children. When adding a new project layout, copy `zos.kdl` or `default.kdl` as the template.
+| File | Format | Notes |
+| --- | --- | --- |
+| `env` | `KEY=value` | No `export`, no command substitution. Secrets go in `~/.env` (gitignored). |
+| `path` | one dir per line | `$HOME` expands; missing dirs are skipped, so it is machine-portable. |
+| `aliases` | `alias name=value` | This one form parses identically in all three shells. Anything needing logic belongs in a script. |
+| `rc.sh` | POSIX | The bash/zsh loader. Fish parses the same three files itself in `config.fish`. |
 
-The statusbar plugin is loaded by absolute path (`/home/omar/.config/zellij/plugins/...`) — don't change this to a relative path; zellij's plugin loader needs the absolute form.
+Tool inits (`zoxide init`, `try init`) are genuinely shell-specific and stay in
+each shell's own rc. `try` emits bash/zsh only, so fish gets a hand-written
+`functions/try.fish`.
+
+Adding a shared alias or PATH entry means editing one file, not three.
 
 ## Conventions
 
-- Keep changes minimal and config-shaped — this is a dotfiles repo, not an app. No build step, no tests.
-- Don't add a config under `root/.config/` and expect it to take effect; also uncomment it in `root/.stow-local-ignore`.
-- A new file only reaches `$HOME` if it is under `root/`. Anything else is repo-only.
-- `root/.env` is intentionally tracked but only contains non-secret env shape; real secrets stay out.
+- Keep changes minimal and config-shaped — this is a dotfiles repo, not an app.
+  No build step, no tests.
+- A new file reaches `$HOME` only if it is inside a package listed in `PKGS`,
+  and only after `make apply`.
+- Secrets never get committed. `.env` and `**/toggl.env` are gitignored;
+  `env.example` carries key names only.
+- After changing `PKGS` or adding files, run `make apply && make ade-check`.

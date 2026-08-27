@@ -11,7 +11,7 @@ PKGS := core shell fish claude desktop herdr ghostty nvim helix tui
 # ~/.config/hypr) would end up writing into git.
 STOW := stow --no-folding -d pkg -t $(HOME)
 
-.PHONY: apply delete adopt on off list ade-check toggl
+.PHONY: apply delete adopt on off list ade-check toggl print-pkgs
 
 apply:                      ## link PKGS into $HOME (idempotent, prunes stale links)
 	@$(STOW) -R $(PKGS)
@@ -42,3 +42,6 @@ ade-check:
 
 toggl:
 	@bash scripts/omarchy-toggl-install.sh
+
+print-pkgs:
+	@echo $(PKGS)

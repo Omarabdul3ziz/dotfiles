@@ -17,7 +17,7 @@
     "description": "Running timer, today and week totals, per-project breakdown, and recent entries to resume.",
     "category": "Time",
     "allowMultiple": false,
-    "defaultSection": "right",
+    "defaultSection": "center",
     "defaults": {
       "refreshIntervalSec": 30,
       "timeFormat": "hh:mm"

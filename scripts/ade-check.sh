@@ -38,16 +38,29 @@ herdr integration status 2>/dev/null | grep -q '^claude: current' \
   && ok "herdr claude integration" || warn "herdr integration install claude"
 
 echo "editor"
+# helix is the prefix+h hand-edit pane; nvim is the full editor. Either is fine
+# as $EDITOR -- set it in ~/.config/shell/env, which all three shells read.
 case "$EDITOR" in
-  *helix) ok "EDITOR=$EDITOR" ;;
-  "")     warn "EDITOR unset" ;;
-  *)      warn "EDITOR=$EDITOR (ADE expects helix; re-login after changing uwsm/default)" ;;
+  *helix|*nvim) ok "EDITOR=$EDITOR" ;;
+  "")           warn "EDITOR unset -- set it in ~/.config/shell/env" ;;
+  *)            warn "EDITOR=$EDITOR (expected helix or nvim)" ;;
 esac
+
+echo "hooks"
+# Vendor-installed, deliberately not tracked -- verify they exist instead.
+[ -x "$HOME/.claude/hooks/herdr-agent-state.sh" ] \
+  && ok "herdr-agent-state.sh" || bad "run: herdr integration install claude"
 
 echo "stow"
 if command -v stow >/dev/null 2>&1; then
-  if stow -n -t "$HOME" root >/dev/null 2>&1; then ok "no conflicts"
-  else warn "make apply would conflict -- run: stow --adopt -t ~ root"; fi
+  pkgs=$(make -s -f "$(dirname "$0")/../Makefile" -C "$(dirname "$0")/.." print-pkgs 2>/dev/null)
+  if stow -n --no-folding -d "$(dirname "$0")/../pkg" -t "$HOME" $pkgs >/dev/null 2>&1; then
+    ok "no conflicts"
+  else
+    warn "make apply would conflict -- run: make adopt, then review git diff"
+  fi
+  dangling=$(find "$HOME" -maxdepth 6 -xtype l -lname "*dotfiles*" 2>/dev/null | wc -l)
+  [ "$dangling" -eq 0 ] && ok "no dangling links" || bad "$dangling dangling link(s) -- run: make apply"
 fi
 
 echo

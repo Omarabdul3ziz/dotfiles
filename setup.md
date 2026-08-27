@@ -83,3 +83,9 @@ curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 
 # add current user to docker/kvm/libvirt groups
 sudo usermod -aG docker,libvirt,kvm $USER
+
+## Environment
+
+- fish (login shell) · ghostty (terminal) · helix · nvim
+- herdr — terminal workspace manager for agents (see ADE.md)
+- zoxide, fzf, lazygit, glow, delta, jq, stow

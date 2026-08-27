@@ -15,8 +15,10 @@ Prefix is `ctrl+space`.
 | `prefix+m` | `docs`  | Glow    | read markdown — plans, specs |
 | `prefix+h` | `edit`  | Helix   | hand edits                   |
 
-Each key opens its tab, or refocuses it if already open. One tab per tool per
-workspace, never duplicates — open a second workspace and it gets its own set.
+`prefix+g`, `prefix+m` and `prefix+h` open their tab, or refocus it if already
+open — one per tool per workspace, never duplicated. `prefix+c` is the
+exception: it always starts a fresh agent, so pressing it twice gives you two
+Claude sessions side by side. Open a second workspace and it gets its own set.
 
 The agent notifies when it finishes or needs you; `prefix+o` jumps to whichever
 pane asked.
@@ -114,44 +116,13 @@ cursor and mode come back as you left them.
 
 ### 1. `herdr-tab` — the open-or-refocus helper
 
-`~/.local/bin/herdr-tab`, mode `755`. Herdr launches it detached, so it sets its
-own `PATH`.
+Tracked at `pkg/herdr/.local/bin/herdr-tab`, linked to `~/.local/bin/herdr-tab`
+by `make apply`. Herdr launches it detached, so it sets its own `PATH`.
 
-```sh
-#!/bin/sh
-# herdr-tab <label> <command...>
-# Open <command> in a new tab in the current workspace; reuse the tab if present.
-set -e
-PATH="$HOME/.local/bin:/usr/local/bin:/usr/bin:/bin:$PATH"
-export PATH
-
-label=$1
-shift
-[ -n "$label" ] && [ $# -gt 0 ] || { echo "usage: herdr-tab <label> <command...>" >&2; exit 2; }
-
-# Tab labels are unique only within a workspace, so every lookup must be scoped
-# to one -- otherwise a label match in another project steals focus to it.
-ws=${HERDR_WORKSPACE_ID:-}
-[ -n "$ws" ] || ws=$(herdr workspace list 2>/dev/null \
-  | jq -r '.result.workspaces[]? | select(.focused) | .workspace_id' | head -1)
-[ -n "$ws" ] || { echo "herdr-tab: no focused workspace" >&2; exit 1; }
-
-existing=$(herdr tab list 2>/dev/null \
-  | jq -r --arg l "$label" --arg w "$ws" \
-      '.result.tabs[]? | select(.label==$l and .workspace_id==$w) | .tab_id' | head -1)
-
-if [ -n "$existing" ]; then
-  herdr tab focus "$existing" >/dev/null
-  exit 0
-fi
-
-pane=$(herdr tab create --workspace "$ws" --label "$label" --focus \
-  | jq -r '.result.root_pane.pane_id')
-[ -n "$pane" ] && [ "$pane" != "null" ] || { echo "herdr-tab: tab create failed" >&2; exit 1; }
-
-# Args are joined into a single shell string: pass a command line, not an argv.
-herdr pane run "$pane" "$*; exit" >/dev/null
-```
+It takes `herdr-tab [-n] <label> <command...>`: look up a tab by label in the
+focused workspace, focus it if found, otherwise create it and run the command.
+`-n` skips the lookup and always creates — that is what makes `prefix+c` stack
+parallel agents rather than refocusing the first one.
 
 Tab labels are unique only per workspace, so the lookup is scoped to the
 focused one — an unscoped match would yank focus into another project.
@@ -194,6 +165,7 @@ switch_tab         = "alt+1..9"
 
 # Acting on the current pane.
 new_tab          = "alt+n"
+new_workspace    = "alt+shift+n"
 split_vertical   = "alt+r"        # zellij: pane-mode r NewPane Right
 split_horizontal = "alt+d"        # zellij: pane-mode d NewPane Down
 zoom             = "alt+f"        # zellij: pane-mode f ToggleFocusFullscreen
@@ -251,11 +223,12 @@ key = "prefix+h"
 type = "shell"
 command = "/home/omar/.local/bin/herdr-tab edit helix"
 
-# The agent itself, on the same open-or-refocus pattern as the rest.
+# A fresh agent every time -- -n skips the reuse lookup, so repeated presses
+# stack up parallel sessions instead of refocusing the first one.
 [[keys.command]]
 key = "prefix+c"
 type = "shell"
-command = "/home/omar/.local/bin/herdr-tab agent claude"
+command = "/home/omar/.local/bin/herdr-tab -n agent claude"
 ```
 
 Paths in `command` must be absolute.
