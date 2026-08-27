@@ -20,13 +20,14 @@ apply:                      ## link PKGS into $HOME (idempotent, prunes stale li
 delete:                     ## unlink PKGS
 	@$(STOW) -D $(PKGS)
 
-adopt:                      ## one-time: pull existing $HOME files into the repo, then link
-	@$(STOW) --adopt $(PKGS)
+adopt:                      ## absorb existing $HOME files into the repo, then link
+	@$(STOW) --adopt $(if $(PKG),$(PKG),$(PKGS))
 	@echo "review 'git diff' before committing -- adopt overwrites repo files with \$$HOME's"
 
-on:                         ## make on PKG=zellij
+on:                         ## make on PKG=zellij  (add PKG to PKGS to keep it on)
 	@test -n "$(PKG)" || { echo "usage: make on PKG=<name>" >&2; exit 2; }
-	@$(STOW) -R $(PKG)
+	@$(STOW) -R $(PKG) 2>/dev/null || { \
+	  echo "$(PKG) has files already in \$$HOME -- run: make adopt PKG=$(PKG)" >&2; exit 1; }
 
 off:                        ## make off PKG=zellij
 	@test -n "$(PKG)" || { echo "usage: make off PKG=<name>" >&2; exit 2; }
