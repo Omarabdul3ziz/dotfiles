@@ -1,0 +1,7 @@
+[language-server.mdpls]
+command = "mdpls"
+config = { markdown.preview.auto = true, markdown.preview.browser = "chromium" }
+
+[[language]]
+name = "markdown"
+language-servers = ["mdpls"]

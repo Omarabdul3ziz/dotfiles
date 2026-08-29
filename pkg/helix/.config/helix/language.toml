@@ -1,4 +1,0 @@
-[[language]]
-name = "markdown"
-language-server = { command = "/path/to/mdpls" }
-config = { markdown.preview.auto = true, markdown.preview.browser = "chromium" }

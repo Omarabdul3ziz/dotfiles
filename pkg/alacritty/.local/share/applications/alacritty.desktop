@@ -3,7 +3,7 @@ Type=Application
 Name=Alacritty
 Comment=Terminal Emulator
 Exec=/home/omar/.cargo/bin/alacritty
-Icon=~/.local/share/img/alacritty.png
+Icon=/home/omar/.local/share/img/alacritty.png
 Terminal=false
 Categories=Development;IDE;
 
