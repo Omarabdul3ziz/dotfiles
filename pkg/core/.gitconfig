@@ -12,16 +12,47 @@
 
 [push]
 	autoSetupRemote = true
-[credential]
-	helper = libsecret
+
 [pull]
 	rebase = false
+
+[credential]
+	helper = libsecret
+
+[diff]
+	algorithm = histogram    # clearer diffs on moved or re-indented lines
+	colorMoved = plain
+	mnemonicPrefix = true    # i/w/c/o instead of a/b in diff headers
+
+[commit]
+	verbose = true           # show the diff in the commit message template
+
+[branch]
+	sort = -committerdate
+
+[tag]
+	sort = -version:refname
+
+[column]
+	ui = auto
+
+# Record conflict resolutions and replay them on the next identical conflict.
+[rerere]
+	enabled = true
+	autoupdate = true
+
 [interactive]
 	diffFilter = delta --color-only
+
 [delta]
 	navigate = true
 	line-numbers = true
 	hyperlinks = true
+
 [alias]
+	co = checkout
+	br = branch
+	ci = commit
+	st = status
 	ds = diff --stat
 	dsc = diff --cached --stat
