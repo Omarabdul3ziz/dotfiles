@@ -28,14 +28,13 @@ make on  PKG=zellij  # activate one package
 make off PKG=herdr   # deactivate one package
 make list            # every package, on or off
 make ade-check       # verify the ADE is installed on this machine (see ADE.md)
-make toggl           # reinstall the Toggl bar widget after an Omarchy update
 ```
 
 `make apply` is safe to re-run. Stow refuses rather than clobbers: if a target
 exists as a real file it aborts the whole run, and the fix is `make adopt`.
 
 `--no-folding` is deliberate. Without it stow symlinks whole directories, and a
-vendor-owned dir like `~/.config/omarchy/plugins/` would end up being written
+vendor-owned dir like `~/.config/hypr/` would end up being written
 into by Omarchy *through* the symlink, inside git. Per-file links cost one
 `make apply` after adding a file; that is the trade.
 
@@ -51,8 +50,7 @@ those files. Track the override, or the script that re-applies it.
   — which already ate a pair of keybindings once. Personal binds belong in
   `overrides.lua`, loaded last and owned by nobody else.
 - `~/.config/omarchy/shell.json` — Omarchy owns and rewrites it on upgrade.
-  **Not tracked.** `scripts/omarchy-toggl-install.sh` jq-merges the bar entry
-  back instead, so a newer Omarchy's widgets survive.
+  **Not tracked.**
 - `~/.claude/hooks/*` — installed by `herdr integration install` and the
   codebase-memory MCP. **Not tracked**; `ade-check` verifies they exist.
 - `~/.config/nvim/lua/plugins/theme.lua` — an Omarchy symlink into
@@ -85,9 +83,9 @@ Adding a shared alias or PATH entry means editing one file, not three.
   No build step, no tests.
 - A new file reaches `$HOME` only if it is inside a package listed in `PKGS`,
   and only after `make apply`.
-- Secrets never get committed, encrypted or not — this repo is public. `.env`,
-  `**/toggl.env`, `secrets/`, `*.gpg` and `*.age` are gitignored; `env.example`
-  carries key names only. Back `~/.env` up outside the repo with
+- Secrets never get committed, encrypted or not — this repo is public. `**/.env`,
+  `secrets/`, `*.gpg` and `*.age` are gitignored; `env.example` carries key
+  names only. Back `~/.env` up outside the repo with
   `make env-backup DEST=...`.
 - `pkg/claude/.claude/CLAUDE.md` is stowed to `~/.claude/CLAUDE.md`, so those
   rules apply to every project. There is deliberately no repo-level copy.

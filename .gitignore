@@ -1,12 +1,5 @@
-
-# secrets - never commit
-.env
-root/.env
+# Secrets never get tracked, encrypted or not -- this repo is public.
 **/.env
-root/.config/omarchy/toggl.env
-**/toggl.env
-
-# secrets never get tracked, encrypted or not
 secrets/
 *.gpg
 *.age
