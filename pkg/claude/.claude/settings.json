@@ -1,15 +1,20 @@
 {
   "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "cleanupPeriodDays": 14,
+  "env": {
+    "BASH_DEFAULT_TIMEOUT_MS": "300000",
+    "BASH_MAX_OUTPUT_LENGTH": "50000"
+  },
   "attribution": {
     "commit": "",
     "pr": ""
   },
   "permissions": {
-    "defaultMode": "auto",
     "deny": [
       "Read(**/.env)",
       "Read(**/.env.*)"
-    ]
+    ],
+    "defaultMode": "auto"
   },
   "hooks": {
     "SessionStart": [
@@ -43,19 +48,14 @@
     "rust-analyzer-lsp@claude-plugins-official": true,
     "typescript-lsp@claude-plugins-official": true
   },
+  "spinnerTipsEnabled": false,
   "promptSuggestionEnabled": false,
+  "askUserQuestionTimeout": "5m",
   "tui": "fullscreen",
   "skipDangerousModePermissionPrompt": true,
   "theme": "dark-ansi",
   "preferredNotifChannel": "notifications_disabled",
   "agentPushNotifEnabled": false,
   "skipAutoPermissionPrompt": true,
-  "//": "stop co-author claude",
-  "env": {
-    "BASH_DEFAULT_TIMEOUT_MS": "300000",
-    "BASH_MAX_OUTPUT_LENGTH": "50000"
-  },
-  "spinnerTipsEnabled": false,
-  "cleanupPeriodDays": 14,
-  "askUserQuestionTimeout": "5m"
+  "//": "stop co-author claude"
 }
