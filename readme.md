@@ -20,5 +20,20 @@ Shared shell config (`env`, `path`, `aliases`) lives in `pkg/shell` and is read
 by bash, zsh and fish alike. Secrets stay in `~/.env`, which is gitignored;
 `env.example` lists the key names.
 
-See `CLAUDE.md` for the layout rules, `ADE.md` for the agent setup, and
-`setup.md` for bootstrapping a new machine.
+## New machine
+
+Omarchy is the installer — there is no bootstrap script here. Install Omarchy,
+then:
+
+```bash
+git clone git@github.com:Omarabdul3ziz/dotfiles.git ~/src/omarz/dotfiles
+cd ~/src/omarz/dotfiles
+make adopt     # absorb whatever Omarchy already put in ~, then link
+git diff       # review what adopt pulled in before committing
+make ade-check
+```
+
+Secrets are not in the repo. Restore `~/.env` with
+`make env-restore SRC=/path/env.gpg` from wherever you backed it up.
+
+See `CLAUDE.md` for the layout rules and `ADE.md` for the agent setup.

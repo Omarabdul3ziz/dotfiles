@@ -44,8 +44,12 @@ into by Omarchy *through* the symlink, inside git. Per-file links cost one
 Omarchy, LazyVim and herdr all ship their own config into `$HOME`. Do not track
 those files. Track the override, or the script that re-applies it.
 
-- `~/.config/hypr/*.lua` — the four files here are pure overrides (`o.bind`,
-  `hl.unbind`) layered on Omarchy's defaults. Tracked.
+- `~/.config/hypr/` — only `overrides.lua` (which Omarchy does not ship at all)
+  and the three-line hook in `hyprland.lua` that requires it. `bindings.lua` and
+  `monitors.lua` are **not tracked**: Omarchy ships and rewrites both, and a
+  rewrite replaces the symlink with a real file rather than writing through it
+  — which already ate a pair of keybindings once. Personal binds belong in
+  `overrides.lua`, loaded last and owned by nobody else.
 - `~/.config/omarchy/shell.json` — Omarchy owns and rewrites it on upgrade.
   **Not tracked.** `scripts/omarchy-toggl-install.sh` jq-merges the bar entry
   back instead, so a newer Omarchy's widgets survive.
@@ -81,6 +85,12 @@ Adding a shared alias or PATH entry means editing one file, not three.
   No build step, no tests.
 - A new file reaches `$HOME` only if it is inside a package listed in `PKGS`,
   and only after `make apply`.
-- Secrets never get committed. `.env` and `**/toggl.env` are gitignored;
-  `env.example` carries key names only.
+- Secrets never get committed, encrypted or not — this repo is public. `.env`,
+  `**/toggl.env`, `secrets/`, `*.gpg` and `*.age` are gitignored; `env.example`
+  carries key names only. Back `~/.env` up outside the repo with
+  `make env-backup DEST=...`.
+- `pkg/claude/.claude/CLAUDE.md` is stowed to `~/.claude/CLAUDE.md`, so those
+  rules apply to every project. There is deliberately no repo-level copy.
+- This is an Omarchy (Arch) machine. There is no bootstrap installer — Omarchy
+  is it. Do not reintroduce apt/snap setup scripts.
 - After changing `PKGS` or adding files, run `make apply && make ade-check`.

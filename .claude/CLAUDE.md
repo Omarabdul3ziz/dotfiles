@@ -1,1 +1,0 @@
-../pkg/claude/.claude/CLAUDE.md
