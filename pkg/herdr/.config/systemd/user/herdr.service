@@ -1,0 +1,23 @@
+[Unit]
+Description=Herdr server
+# Best-effort ordering: when the graphical session comes up in the same transaction,
+# start after it so panes inherit WAYLAND_DISPLAY and friends. Deliberately not
+# PartOf/BindsTo -- the server has to outlive a graphical logout, because the collie
+# bridge drives it from a phone with no session attached.
+After=default.target graphical-session.target
+# Never give up restarting, same reason collie.service doesn't.
+StartLimitIntervalSec=0
+
+[Service]
+Type=simple
+ExecStart=%h/.local/bin/herdr server
+Restart=on-failure
+RestartSec=5
+# SIGTERM reaches the server only, not the panes underneath it. Herdr's own shutdown
+# path writes session.json and then hangs up each pane; tearing down the whole cgroup
+# at once would race that save.
+KillMode=mixed
+TimeoutStopSec=30
+
+[Install]
+WantedBy=default.target

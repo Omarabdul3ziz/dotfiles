@@ -24,6 +24,21 @@ done
 grep -q 'new_cwd' "$cfg" 2>/dev/null && ok "new_cwd pinned" || warn "new_cwd not pinned"
 grep -q '^\[theme\]' "$cfg" 2>/dev/null && ok "theme pinned" || warn "theme not pinned"
 
+echo "autostart"
+# The unit is what makes the server come up on its own. Without it herdr only runs
+# when something launches it by hand, and a reboot restores whatever session.json
+# was last written -- which can be days stale.
+systemctl --user is-enabled herdr.service >/dev/null 2>&1 \
+  && ok "herdr.service enabled" || bad "run: systemctl --user enable herdr.service"
+# A hand-started server works today but drifts from what the next boot will do.
+if systemctl --user is-active herdr.service >/dev/null 2>&1; then
+  ok "server under systemd"
+elif [ -S "$HOME/.config/herdr/herdr.sock" ]; then
+  warn "server running outside systemd -- the unit takes over at next boot"
+else
+  warn "no herdr server running"
+fi
+
 echo "notifications"
 # Herdr notifies on its own from pane state; a Claude-side hook doubles it.
 [ -e "$HOME/.claude/hooks/herdr-notify.sh" ] \
