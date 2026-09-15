@@ -70,23 +70,23 @@ delivery = "terminal"
 [[keys.command]]
 key = "prefix+g"
 type = "shell"
-command = "/home/omar/.local/bin/herdr-tab git lazygit"
+command = "$HOME/.local/bin/herdr-tab git lazygit"
 
 # Browse and read markdown (plans, docs) in a new tab.
 [[keys.command]]
 key = "prefix+m"
 type = "shell"
-command = "/home/omar/.local/bin/herdr-tab docs glow"
+command = "$HOME/.local/bin/herdr-tab docs glow"
 
 # Edit files in the current workspace without leaving the session.
 [[keys.command]]
 key = "prefix+h"
 type = "shell"
-command = "/home/omar/.local/bin/herdr-tab edit helix"
+command = "$HOME/.local/bin/herdr-tab edit helix"
 
 # A fresh agent every time -- -n skips the reuse lookup, so repeated presses
 # stack up parallel sessions instead of refocusing the first one.
 [[keys.command]]
 key = "prefix+c"
 type = "shell"
-command = "/home/omar/.local/bin/herdr-tab -n agent claude"
+command = "$HOME/.local/bin/herdr-tab -n agent claude"
