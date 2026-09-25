@@ -1,6 +1,23 @@
 -- All personal Hyprland customization lives here, loaded last from hyprland.lua
 -- so it overrides both Omarchy's defaults and the per-topic user files.
 
+-- Read a key from ~/.env (gitignored, backed up with `make env-backup`) so
+-- private hosts stay out of this public repo. Same KEY=value format as
+-- ~/.config/shell/env. Returns nil when the file or key is absent.
+local function dotenv(key)
+  local f = io.open((os.getenv("HOME") or "") .. "/.env", "r")
+  if not f then return nil end
+  local value
+  for line in f:lines() do
+    local k, v = line:match("^%s*([%w_]+)%s*=%s*(.-)%s*$")
+    if k == key and v and v ~= "" then
+      value = v:gsub('^"(.*)"$', "%1"):gsub("^'(.*)'$", "%1")
+    end
+  end
+  f:close()
+  return value
+end
+
 -- Bindings --------------------------------------------------------------------
 
 -- SUPER+SHIFT+O is already Obsidian launch-or-focus by default, so no override.
@@ -16,8 +33,12 @@ o.bind("SUPER + SHIFT + RETURN", "Herdr",
 
 -- Was: Herdr in the default terminal (foot), redundant with the binding above
 hl.unbind("SUPER + CTRL + RETURN")
-o.bind("SUPER + CTRL + RETURN", "Herdr (server)",
-  'setsid uwsm-app -- ghostty -e herdr --remote omarz@77.42.4.14 --remote-keybindings server')
+local herdr_remote = dotenv("HERDR_REMOTE")
+if herdr_remote then
+  o.bind("SUPER + CTRL + RETURN", "Herdr (server)",
+    'setsid uwsm-app -- ghostty -e herdr --remote ' .. herdr_remote ..
+    ' --remote-keybindings server')
+end
 
 -- Captures
 o.bind("F8", "Screenshot", "omarchy-capture-screenshot")

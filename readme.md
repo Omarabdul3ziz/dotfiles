@@ -10,7 +10,15 @@ make list            # show every package and whether it is on
 make on  PKG=zellij  # activate one
 make off PKG=herdr   # deactivate one
 make adopt           # first run on a new machine: absorb existing ~ files, then link
+make desktop-export  # snapshot omarchy plugins + customized vendor config
+make desktop-restore # put them back on a new machine
 ```
+
+Not everything can be a symlink. Omarchy rewrites some of its own config, and a
+rewrite replaces a symlink with a real file — so the bar layout, the omarchy
+plugin list and a few vendor-owned files are *copies* under `desktop/`, refreshed
+with `make desktop-export`. Run it after installing a plugin or rearranging the
+bar, then commit.
 
 The `PKGS` line in the `Makefile` is the profile — it decides what is linked.
 Everything else stays tracked but dormant, which is how `herdr`, `zellij` and
@@ -30,6 +38,7 @@ git clone git@github.com:Omarabdul3ziz/dotfiles.git ~/src/omarz/dotfiles
 cd ~/src/omarz/dotfiles
 make adopt     # absorb whatever Omarchy already put in ~, then link
 git diff       # review what adopt pulled in before committing
+make desktop-restore   # reinstall omarchy plugins, restore bar + vendor config
 make ade-check
 ```
 

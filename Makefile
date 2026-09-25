@@ -1,6 +1,6 @@
 # Which packages are linked into $HOME. This line is the profile: everything
 # under pkg/ is tracked, only what is listed here is active.
-PKGS := core shell fish claude desktop herdr ghostty nvim helix tui
+PKGS := core shell fish claude hypr herdr ghostty nvim helix tui
 
 # Off by default, kept for reference: zsh zellij tmux alacritty
 #   make on  PKG=zellij
@@ -11,7 +11,7 @@ PKGS := core shell fish claude desktop herdr ghostty nvim helix tui
 # ~/.config/hypr) would end up writing into git.
 STOW := stow --no-folding -d pkg -t $(HOME)
 
-.PHONY: apply delete adopt on off list ade-check print-pkgs env-backup env-restore
+.PHONY: apply delete adopt on off list ade-check print-pkgs env-backup env-restore desktop-export desktop-restore
 
 apply:                      ## link PKGS into $HOME (idempotent, prunes stale links)
 	@$(STOW) -R $(PKGS)
@@ -54,6 +54,16 @@ env-restore:                ## make env-restore SRC=/path/env.gpg
 	@gpg --decrypt --output "$(HOME)/.env" "$(SRC)"
 	@chmod 600 "$(HOME)/.env"
 	@echo "~/.env restored (mode 600)"
+
+# ~/.config/omarchy and the vendor-owned files under ~/.config/hypr cannot be
+# stowed -- a vendor rewrite replaces a symlink with a real file. They are
+# snapshotted into desktop/ by copy instead. scripts/desktop-lib.sh lists what
+# is in scope; re-run desktop-export after changing plugins or the bar.
+desktop-export:             ## snapshot omarchy plugins + customized vendor config into desktop/
+	@sh scripts/desktop-export.sh
+
+desktop-restore:            ## reinstall those plugins and restore that config (PIN=1 to pin commits)
+	@sh scripts/desktop-restore.sh
 
 ade-check:
 	@sh scripts/ade-check.sh

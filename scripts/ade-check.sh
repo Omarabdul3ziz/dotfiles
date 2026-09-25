@@ -66,6 +66,24 @@ echo "hooks"
 [ -x "$HOME/.claude/hooks/herdr-agent-state.sh" ] \
   && ok "herdr-agent-state.sh" || bad "run: herdr integration install claude"
 
+echo "hyprland"
+# hyprland.lua is Omarchy's own loader, deliberately NOT tracked: an upgrade
+# rewrites it, and a rewrite replaces a symlink with a real file. Only the hook
+# into overrides.lua is ours, so verify the hook survived the last upgrade.
+hyprmain="$HOME/.config/hypr/hyprland.lua"
+if [ -f "$hyprmain" ]; then
+  grep -q 'require("hypr.overrides")' "$hyprmain" \
+    && ok "overrides hook in hyprland.lua" \
+    || bad "hyprland.lua lost require(\"hypr.overrides\") -- re-add it, an upgrade overwrote the file"
+else
+  bad "$hyprmain missing"
+fi
+[ -L "$HOME/.config/hypr/overrides.lua" ] \
+  && ok "overrides.lua stowed" || bad "overrides.lua is not a symlink -- run: make apply"
+grep -q '77\.42\.4\.14' "$HOME/.config/hypr/overrides.lua" 2>/dev/null \
+  && bad "a private host is hardcoded in overrides.lua -- move it to ~/.env" \
+  || ok "no hardcoded remote host"
+
 echo "stow"
 if command -v stow >/dev/null 2>&1; then
   pkgs=$(make -s -f "$(dirname "$0")/../Makefile" -C "$(dirname "$0")/.." print-pkgs 2>/dev/null)

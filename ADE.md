@@ -136,100 +136,10 @@ reclaimed (to `alt+n`, `prefix+f`, and `prefix+left`) before being rebound.
 `new_cwd = "follow"` is load-bearing: it is what makes `prefix+g` open lazygit
 in the repo you are actually working in rather than `$HOME`.
 
-```toml
-onboarding = false
-
-[theme]
-name = "one-dark"
-
-auto_switch = false
-[theme.custom]
-panel_bg = "black"
-
-[terminal]
-# New tabs inherit the source workspace's cwd -- this is what makes prefix+g
-# open lazygit in the repo you are actually working in.
-new_cwd = "follow"
-
-[keys]
-prefix = "ctrl+space"
-
-# One axis per unit: h/l tabs, j/k agents, shift+j/k spaces.
-previous_tab       = ["alt+h", "alt+left"]
-next_tab           = ["alt+l", "alt+right"]
-previous_agent     = ["alt+k", "alt+up"]
-next_agent         = ["alt+j", "alt+down"]
-previous_workspace = ["alt+shift+k", "alt+shift+up"]
-next_workspace     = ["alt+shift+j", "alt+shift+down"]
-switch_tab         = "alt+1..9"
-
-# Acting on the current pane.
-new_tab          = "alt+n"
-new_workspace    = "alt+shift+n"
-split_vertical   = "alt+r"        # zellij: pane-mode r NewPane Right
-split_horizontal = "alt+d"        # zellij: pane-mode d NewPane Down
-zoom             = "alt+f"        # zellij: pane-mode f ToggleFocusFullscreen
-close_pane       = "alt+x"        # zellij: pane-mode x
-# Pane focus moves to the arrows; hjkl is freed for command bindings.
-focus_pane_left  = "prefix+left"
-focus_pane_down  = "prefix+down"
-focus_pane_up    = "prefix+up"
-focus_pane_right = "prefix+right"
-
-# goto default is prefix+g, reclaimed below for lazygit.
-goto = "prefix+f"
-
-[ui]
-accent = "blue"
-sidebar_width = 34              # 26 truncates the agent session title (max 36)
-status_indicators = "symbols"   # state by glyph, not colour alone
-redraw_on_focus_gained = false  # no flash when returning from another Hyprland window
-pane_gaps = false
-pane_outer_borders = false
-pane_scrollbars = false
-confirm_close = false
-prompt_new_tab_name = false
-show_agent_labels_on_pane_borders = true
-agent_panel_sort = "priority"
-tab_bar_right = [{ type = "zoom" }, { type = "hostname" }]
-
-# Claude Code writes a content-derived OSC title per session; show it instead
-# of a generic "claude" label so agents are identified by what they're doing.
-[ui.sidebar.agents.rows_by_agent]
-claude = [["state_icon", "workspace", "terminal_title_stripped"]]
-
-# Spaces on one line too, mirroring the agent row: status, where, what.
-[ui.sidebar.spaces]
-rows = [["state_icon", "workspace", "branch", "git_status"]]
-
-[ui.toast]
-delivery = "terminal"
-
-# Review the diff, stage hunks, commit — without leaving the session.
-[[keys.command]]
-key = "prefix+g"
-type = "shell"
-command = "/home/omar/.local/bin/herdr-tab git lazygit"
-
-# Browse and read markdown (plans, docs) in a new tab.
-[[keys.command]]
-key = "prefix+m"
-type = "shell"
-command = "/home/omar/.local/bin/herdr-tab docs glow"
-
-# Edit files in the current workspace without leaving the session.
-[[keys.command]]
-key = "prefix+h"
-type = "shell"
-command = "/home/omar/.local/bin/herdr-tab edit helix"
-
-# A fresh agent every time -- -n skips the reuse lookup, so repeated presses
-# stack up parallel sessions instead of refocusing the first one.
-[[keys.command]]
-key = "prefix+c"
-type = "shell"
-command = "/home/omar/.local/bin/herdr-tab -n agent claude"
-```
+The config itself is tracked, not duplicated here — read it at
+`pkg/herdr/.config/herdr/config.toml`, which `make apply` stows to
+`~/.config/herdr/config.toml`. `make ade-check` validates the live file
+(`herdr config check`); a copy pasted from a doc passes nothing.
 
 Paths in `command` must be absolute.
 
@@ -250,29 +160,15 @@ hooks, statusline, and plugin settings.
 
 ### 4. delta — `~/.gitconfig`
 
-```ini
-[core]
-	pager = delta
-[interactive]
-	diffFilter = delta --color-only
-[delta]
-	navigate = true
-	line-numbers = true
-	hyperlinks = true
-```
+Tracked at `pkg/core/.gitconfig` (stowed to `~/.gitconfig`). `navigate = true`
+is what enables `n` / `N` hunk jumping.
 
 ### 5. LazyGit — `~/.config/lazygit/config.yml`
 
 Routes lazygit's diffs through the same delta.
 
-```yaml
-git:
-  diffRenderers:
-    - type: stdinFilter
-      name: delta
-      colorArg: always
-      command: delta --dark --paging=never
-```
+Tracked at `pkg/tui/.config/lazygit/config.yml`. Routes lazygit's diffs through
+the same delta.
 
 ### 6. Glow — `~/.config/glow/glow.yml`
 
@@ -394,7 +290,8 @@ Rules:
   every integration install. Add hooks beside it.
 - Merge into `~/.claude/settings.json`, never overwrite it — it also holds
   hooks, statusline, permissions, and plugin settings.
-- If `~/.config/herdr` is a real directory rather than a symlink, edits to a
-  dotfiles copy do nothing until copied across.
+- With `--no-folding`, `~/.config/herdr/` is a real directory and only
+  `config.toml` inside it is a symlink into the repo. If that file is a real
+  file instead, `make apply` has not run and repo edits do nothing.
 - `herdr config check` validates the live file only. It passing does not mean a
   repo copy is valid.
