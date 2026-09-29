@@ -30,3 +30,6 @@ test -r $sh_dir/aliases; and source $sh_dir/aliases
 if status is-interactive
     command -q zoxide; and zoxide init fish | source
 end
+
+# Hermes Agent command
+fish_add_path "$HOME/.local/bin"
