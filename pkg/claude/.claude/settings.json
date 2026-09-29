@@ -3,7 +3,8 @@
   "cleanupPeriodDays": 14,
   "env": {
     "BASH_DEFAULT_TIMEOUT_MS": "300000",
-    "BASH_MAX_OUTPUT_LENGTH": "50000"
+    "BASH_MAX_OUTPUT_LENGTH": "50000",
+    "RESUME_FORGE_HOME": "/home/omar/src/omarz/resume-forge-data"
   },
   "attribution": {
     "commit": "",
@@ -46,7 +47,17 @@
   "enabledPlugins": {
     "gopls-lsp@claude-plugins-official": true,
     "rust-analyzer-lsp@claude-plugins-official": true,
-    "typescript-lsp@claude-plugins-official": true
+    "typescript-lsp@claude-plugins-official": true,
+    "resume-forge@resume-forge": true,
+    "frontend-design@claude-plugins-official": true
+  },
+  "extraKnownMarketplaces": {
+    "resume-forge": {
+      "source": {
+        "source": "github",
+        "repo": "Omarabdul3ziz/resume-forge"
+      }
+    }
   },
   "spinnerTipsEnabled": false,
   "promptSuggestionEnabled": false,
@@ -57,5 +68,40 @@
   "preferredNotifChannel": "notifications_disabled",
   "agentPushNotifEnabled": false,
   "skipAutoPermissionPrompt": true,
+  "autoMode": {
+    "soft_deny": [
+      "$defaults",
+      "Bash(make prod-up:*)",
+      "Bash(make prod-down:*)",
+      "Bash(make image-push:*)"
+    ],
+    "environment": [
+      "### Org-wide",
+      "**Organization**: None configured",
+      "**Cloud provider(s)**: None configured",
+      "**Repository visibility**: not queryable here via gh — repo name/remote (github.com:Omarabdul3ziz/exora.git) gives no public/private signal either; assume private per shipped default",
+      "**Internal sharing / snippet hosting**: None configured — treat public paste/gist services as outside the trust boundary",
+      "**Secrets management**: env files (.env, .env.local, .env.example) loaded via internal/platform/config; secrets (ANTHROPIC_API_KEY, TAVILY_API_KEY, GEMINI_API_KEY, BORSAHALAL_REFRESH_TOKEN, MANSA_API_KEY, FRED_API_KEY, GOOGLE_CLIENT_SECRET) read from plain environment, not a managed secrets service",
+      "**Default / protected branches**: main is default; 1 protected branch listed via gh but its name is redacted (outside display charset) — treat main as protected",
+      "**CI/CD deploy targets**: None configured — Makefile has prod-up/prod-down/prod-pull/prod-logs/image-push targets but no deploy host or registry was identified in gathered evidence",
+      "**Network posture**: None configured",
+      "**Host containment**: None configured — assume Claude Code runs on an ordinary developer machine with open internet",
+      "**Source control**: The trusted repo (github.com:Omarabdul3ziz/exora.git, origin) and its remote only — no additional orgs configured",
+      "**Trusted internal domains**: None configured",
+      "**Trusted cloud buckets**: None configured",
+      "**Key internal services**: None configured",
+      "**Internal package registry**: None configured",
+      "**Sensitive data locations & audiences**: .env, .env.local, .env.bak-prerename, and config values holding ANTHROPIC_API_KEY, TAVILY_API_KEY, GEMINI_API_KEY, BORSAHALAL_REFRESH_TOKEN, MANSA_API_KEY, FRED_API_KEY, GOOGLE_CLIENT_SECRET, and session-cookie hashes (SHA-256 in internal/app/auth); share only with audiences cleared at the [named+specifics] bar",
+      "**Data retention / declassification**: None configured",
+      "**Sensitive remote targets**: any namespace/host/container carrying prod or production as a whole word/segment — includes docker-compose.prod.yml and Makefile targets prod-up/prod-down/prod-pull/prod-logs in this repo",
+      "**Protected deployment namespaces / environments**: None configured — fall back to the Sensitive remote targets heuristic",
+      "**Protected IaC scopes**: IAM, RBAC, networking, quota, and node-pool resources; anything whose name or tag carries prod or production as a whole word or name segment",
+      "### User-specific",
+      "**Primary use of Claude Code**: software development (Go monorepo — ExOra, EGX research/advisory app split into fuse/oracle/app services)",
+      "**Trusted repo**: /home/omar/src/omarz/exora (working directory) and its origin remote github.com:Omarabdul3ziz/exora.git — visibility unverified, treat as private per shipped default",
+      "**Org-specific CLIs**: None configured — project uses standard go, make, docker, sqlc tooling plus repo-local ./bin/fuse and ./bin/oracle binaries",
+      "routine under this repo's Makefile targets (build, test, lint, sqlc, migrate-new, fuse, fuse-api, oracle, run, up/down/logs) is ordinary dev work"
+    ]
+  },
   "//": "stop co-author claude"
 }
