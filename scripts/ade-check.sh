@@ -7,7 +7,7 @@ bad()  { printf '  FAIL  %s\n' "$1"; fail=1; }
 warn() { printf '  warn  %s\n' "$1"; }
 
 echo "deps"
-for c in herdr claude lazygit glow helix delta jq git python3; do
+for c in foot fish herdr claude lazygit glow helix delta jq git python3; do
   command -v "$c" >/dev/null 2>&1 && ok "$c" || bad "$c missing"
 done
 

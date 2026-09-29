@@ -25,6 +25,9 @@ pane asked.
 
 ## Tools
 
+- **Foot** — the terminal. `SUPER+SHIFT+RETURN` opens local herdr,
+  `SUPER+CTRL+RETURN` the remote server session.
+- **Fish** — login shell in every pane.
 - **Herdr** — session/tab/agent manager. Owns the keymap.
 - **Claude Code** — the agent.
 - **LazyGit** — git TUI, diffs rendered through delta.
@@ -34,7 +37,7 @@ pane asked.
 ## Deps
 
 ```
-herdr  claude  lazygit  glow  helix  delta  jq  git  python3
+foot  fish  herdr  claude  lazygit  glow  helix  delta  jq  git  python3
 ```
 
 `delta` renders diffs for both git and lazygit. `jq` is required by the
@@ -43,7 +46,7 @@ herdr  claude  lazygit  glow  helix  delta  jq  git  python3
 and herdr never learns the agent's state.
 
 ```bash
-for c in herdr claude lazygit glow helix delta jq git python3; do
+for c in foot fish herdr claude lazygit glow helix delta jq git python3; do
   command -v "$c" >/dev/null || echo "missing: $c"
 done
 ```

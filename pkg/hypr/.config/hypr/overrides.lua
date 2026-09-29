@@ -29,14 +29,14 @@ o.bind("SUPER + SHIFT + G", "Telegram", { launch = "AyuGram", focus = "^AyuGram$
 -- Was: Browser
 hl.unbind("SUPER + SHIFT + RETURN")
 o.bind("SUPER + SHIFT + RETURN", "Herdr",
-  'setsid uwsm-app -- ghostty --working-directory="$(omarchy-cmd-terminal-cwd)" -e herdr')
+  'setsid uwsm-app -- foot --working-directory="$(omarchy-cmd-terminal-cwd)" herdr')
 
--- Was: Herdr in the default terminal (foot), redundant with the binding above
+-- Was: Herdr in the default terminal (foot); now the remote server session
 hl.unbind("SUPER + CTRL + RETURN")
 local herdr_remote = dotenv("HERDR_REMOTE")
 if herdr_remote then
   o.bind("SUPER + CTRL + RETURN", "Herdr (server)",
-    'setsid uwsm-app -- ghostty -e herdr --remote ' .. herdr_remote ..
+    'setsid uwsm-app -- foot herdr --remote ' .. herdr_remote ..
     ' --remote-keybindings server')
 end
 
