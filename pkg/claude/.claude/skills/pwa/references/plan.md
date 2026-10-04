@@ -14,6 +14,7 @@ The user's message is the brief. Check it covers:
 | Core loop, as verbs | Work → Capture → Write → Done |
 | What the user creates; required vs optional, and why | "Photo required — a memory, not evidence" |
 | Who uses it (just me? family? public later?) | "Me + one shared account with my mom" |
+| How often: daily / weekly / monthly | "Now and then, a monthly check" → no Today list |
 | Tricky rules with edge cases | "Never skip two days in a row" |
 | Feel + what to avoid | calm, journal-like; no dashboard look |
 | Non-goals | no XP, no tags, no export yet |
@@ -68,6 +69,11 @@ Keep going round by round. After each round, record answers under
 Challenge an assumption if research contradicts it — say so plainly.
 When the user says "simpler", actually cut: remove features, screens, stack
 pieces, and re-derive the stack if the scope changed.
+
+Every app gets a **landing page** by default (no need to ask): signed-out
+visitors to `/` see a headline that says what the app is (not a slogan),
+3–4 features, and one Sign in button top-right; signed-in users go straight
+to the main screen. Write its copy in the plan.
 
 ## 4. Write the plan
 

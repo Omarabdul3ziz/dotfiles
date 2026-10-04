@@ -34,6 +34,11 @@ Read the matching reference before acting:
   raw rows. The server only enforces invariants (ownership, uniqueness, validation).
 - **Calm, not SaaS.** No dashboards, stat cards, badges, gradients, icon grids,
   modal hell. One primary action per screen, sheets over pages, undo over confirm.
+- **Fit the rhythm.** Ask how often the app is used (daily / weekly / monthly);
+  an occasional app gets no "Today" list, streaks or daily nudges.
+- **Real data is sacred.** Imports dry-run first and apply only on the user's
+  go; migrations are tested on a copy of live data; live tests never write to
+  real users.
 - **Verify by using it.** "Compiles" is not done. Open it, look at screenshots,
   break the network, test against the real deployed instance.
 - **Check research.** Cheap research agents get numbers, limits and prices
@@ -47,6 +52,20 @@ Read the matching reference before acting:
   and keep working — answering must not end the run.
 - **Never commit or push unless asked.** New repos default to private.
 
+## Preferences (Omar)
+
+- KISS: the simple version first, few comments, no clever abstractions.
+- Subagents for parallel work (Haiku for web search); UI stays in the main agent.
+- Never commit or push unless asked.
+- App login for every PWA: omarabdul3ziz@gmail.com (superuser admin@<app>.local); logins live only in Vaultwarden, folder HomeLab.
+- Desktop is a real layout from day one (two columns ≥ 800px), not a phone strip.
+- Primary action (Add) in the top bar; wordmark links home; one Sign in, top-right.
+- Small line icons only on the landing feature row. One allocation ring is the
+  only donut-style chart allowed (thin, swatches on the rows, no hover).
+- Recurring misses to check before calling a phase done: landing added late,
+  desktop added late, plan drifting from the code, homepage `PWA` group
+  missing, Lighthouse not run.
+
 ## Plan state
 
 `docs/PLAN.md` carries the state in its header — every step reads it first:
@@ -57,3 +76,8 @@ Status: draft | approved <date> | built <date> | deployed <date> — <url>
 
 `build` refuses unless status is `approved`. The user approving in chat
 ("go", "start", "looks good, build it") is what flips it — write the line, then build.
+
+Plans are history: never delete `docs/PLAN*.md`. After each deploy, add or
+refresh `CLAUDE.md` (what the app is, commands, rules, traps, preferences) and
+`docs/adr/NNNN-<slug>.md` (one per decision, from the **Decided** lines), and
+give the finished plan a one-line "Done — see CLAUDE.md / ADRs" status.

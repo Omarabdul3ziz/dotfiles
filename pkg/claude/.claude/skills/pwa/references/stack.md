@@ -36,7 +36,8 @@ web/
   src/lib/ui/        # Sheet, Toast, …
   src/lib/data.svelte.ts   # class with $state + pb SDK, optimistic updates
   src/lib/ui.svelte.ts     # sheet state (discriminated union) + undo toast
-  src/routes/        # few: /, /login, maybe one more
+  src/routes/        # few: / (landing when signed out, app when signed in), /login, maybe one more
+  src/lib/ui/Landing.svelte  # signed-out /: headline, example, features, Sign in
   static/  manifest.json  icon.svg  icon-192/512.png  icon-maskable-512.png  apple-touch-icon.png
   e2e/     playwright.config.ts
 scripts/ dev-server.sh  seed-demo.mjs  deploy.sh
@@ -53,11 +54,13 @@ pnpm dlx sv create web --template minimal --types ts --add vitest sveltekit-adap
 - If install fails with "packages field missing": delete the generated
   `pnpm-workspace.yaml`, put `"pnpm": {"onlyBuiltDependencies": ["esbuild"]}` in package.json.
 - `adapter({ fallback: 'index.html' })`; `+layout.ts`: `ssr = false; prerender = false`.
-- vite dev proxy: `'/api'` and `'/_'` → `http://127.0.0.1:8090`.
+- vite dev proxy: `'/api'` and `'/_'` → `` `http://127.0.0.1:${process.env.PB_PORT ?? 8090}` ``.
 - Force runes in `vite.config.ts` compilerOptions.
 
 `scripts/dev-server.sh`: `migrate up`, `superuser upsert admin@<app>.local <devpass>`,
-`serve --http=127.0.0.1:8090 --dir --hooksDir --migrationsDir --publicDir=../web/build`.
+`serve --http=127.0.0.1:${PB_PORT:-8090} --dir --hooksDir --migrationsDir --publicDir=../web/build`.
+Every app gets its own `PB_PORT` (apps clash on 8090); build runs it + `pnpm dev`
+in the background the whole time (build.md step 0).
 Run `serve` once, then read `pb_data/types.d.ts` for exact hook APIs.
 
 ## PocketBase
@@ -66,7 +69,10 @@ Run `serve` once, then read `pb_data/types.d.ts` for exact hook APIs.
   `owner = @request.auth.id`; on update also
   `(@request.body.owner:isset = false || @request.body.owner = @request.auth.id)`
   so ownership can't move; immutable fields `@request.body.<f>:changed = false`.
-- Public sign-up off: `users.createRule = null`; superuser creates users.
+- Invite-only in every app: `users.createRule = null`. Live users and
+  superusers are created only with the homelab `pb-account` script (deploy.md
+  §3), logins kept in Vaultwarden. Dev logins (`admin@<app>.local`) stay local.
+- Migrations never throw (a throw stops `serve`); checks go in the deploy script.
 - Constraints as unique indexes (e.g. one entry per item per day).
 - Settings in the migration: backups cron (`30 2 * * *`, keep 14),
   `trustedProxy` headers, rate limits on.
@@ -163,10 +169,29 @@ field's maxSize.
 
 Tokens on `:root`: `--paper --ink --ink-2 --line --raised --scrim` + accents
 that carry meaning only. Dark via `prefers-color-scheme` (warm/tinted, never
-pure black), `color-scheme` set, no toggle. One column (max ~460–720px),
-grouping by whitespace, `100dvh`, `env(safe-area-inset-*)`, `:focus-visible`,
-`tabular-nums`, logical properties. Sheets: `role=dialog aria-modal`, Esc
-closes, focus returns, scroll locked. Undo toast instead of confirm dialogs.
+pure black), `color-scheme` set, no toggle. Phone: one column (~460px),
+grouping by whitespace. Desktop from day one: ≥ 800px two columns, max
+~1040px, 32px gutters. `100dvh`, `env(safe-area-inset-*)`, `:focus-visible`,
+`tabular-nums`, logical properties. Undo toast instead of confirm dialogs.
+
+- **Top bar:** wordmark (a link to `/`), nav, and the primary action as a
+  button (e.g. Add). No fixed action strip at the screen edge, no floating
+  action button.
+- **Sheets:** `role=dialog aria-modal`, Esc closes, focus returns, scroll
+  locked; bottom sheet on phone, centered ~520px dialog on desktop. One at a
+  time, short, never nested, at most two main actions.
+
+## Landing
+
+Signed-out `/` renders `Landing.svelte` from the layout (not a route of its own); every
+other signed-out path redirects to `/login?next=<path>`, and `/login` returns to `next`.
+401 / sign-out → back to `/`. One screen, calm: a headline that says what the app is
+(not a slogan) + one line, one small **static example** of the main screen made from
+the real components or tokens (fake data, labelled "Example"), 3–4 features as a small
+line icon + a few words (nothing unbuilt), and the access line. Sign in is a single
+button in the top bar, right side — no second one at the bottom. Phone: stacked;
+desktop: hero + example side by side, features in one row. No marketing tropes
+(stat counters, testimonials, logo walls, gradients).
 
 ## Tests
 
@@ -175,35 +200,44 @@ closes, focus returns, scroll locked. Undo toast instead of confirm dialogs.
   env `PB_URL PB_ADMIN PB_PASS`; creates timestamped users A and B;
   checks sign-up closed, B can't read/write A, can't create for others,
   immutable fields, unique index, invalid/future values, cascades, protected files.
+- **Scenario:** money/time math gets one hand-checked year of real use with
+  expected totals per month (`core/scenario.test.ts`).
 - **E2E:** `devices['Pixel 7']`, `workers: 1`, `baseURL` from `<APP>_URL`
-  (same suite runs against production), chromium from `CHROMIUM` env
+  (local production build; live only with a throwaway user), chromium from `CHROMIUM` env
   (`/usr/bin/chromium`); `beforeAll` creates a throwaway user via superuser,
   `afterAll` deletes it; role/label selectors; core loop + `page.route(...).abort()`
   failure path (+ `context.setOffline` flow if there's an outbox).
+- E2E sign-in helper waits and retries on PocketBase's "Too Many Requests" (login rate limit) instead of disabling it; test servers get their own data dir (`PB_DIR=$(mktemp -d)`), never the dev server's.
 - Browser automation fallback: if Chrome MCP is blocked, Playwright screenshots.
 - Shell: don't `pkill -f <pattern>` (matches its own shell) — kill by PID.
 
 ## Deploy shape
 
-`deploy/compose.yaml` (goes into the homelab repo as `compose/<app>/compose.yaml`):
+The app ships as a tagged image built **on the homelab** from a small build
+context that `pwa-deploy` rsyncs over (deploy.md §3). Data stays in the bind
+mount; the image holds only code.
+
+`deploy/Dockerfile` (app repo):
+
+```dockerfile
+FROM pocketbase:<pinned>          # shared base, built once on the homelab, cached
+COPY pb_public /pb/pb_public
+COPY pb_hooks /pb/pb_hooks
+COPY pb_migrations /pb/pb_migrations
+USER 1000:1000
+ENTRYPOINT ["/pb/pocketbase", "serve", "--http=0.0.0.0:8090", "--dir=/srv/pb_data", "--publicDir=/pb/pb_public", "--hooksDir=/pb/pb_hooks", "--migrationsDir=/pb/pb_migrations"]
+```
+
+`compose/<app>/compose.yaml` (homelab repo, committed there, never overwritten by a deploy):
 
 ```yaml
 services:
   <app>:
-    build:
-      dockerfile_inline: |
-        FROM alpine:3.22
-        ARG PB_VERSION=<pinned>
-        RUN apk add --no-cache ca-certificates tzdata unzip wget \
-          && wget -q https://github.com/pocketbase/pocketbase/releases/download/v$${PB_VERSION}/pocketbase_$${PB_VERSION}_linux_amd64.zip -O /tmp/pb.zip \
-          && unzip /tmp/pb.zip pocketbase -d /pb && rm /tmp/pb.zip
-        USER 1000:1000
-        ENTRYPOINT ["/pb/pocketbase", "serve", "--http=0.0.0.0:8090", "--dir=/srv/pb_data", "--publicDir=/srv/pb_public", "--hooksDir=/srv/pb_hooks", "--migrationsDir=/srv/pb_migrations"]
-    image: <app>-pocketbase:<pinned>
+    image: <app>:${TAG}
     pull_policy: never
     container_name: <app>
     ports: ["127.0.0.1:<hostport>:8090"]
-    volumes: ["/home/<user>/srv/<app>:/srv"]
+    volumes: ["/home/<user>/srv/<app>/pb_data:/srv/pb_data"]
     environment: [TZ=<tz>]
     healthcheck:
       test: ["CMD", "wget", "-q", "--spider", "http://127.0.0.1:8090/api/health"]
@@ -217,4 +251,5 @@ services:
       - "homepage.description=<one line>"
 ```
 
-`0.0.0.0` inside the container is fine; the host side is `127.0.0.1` only.
+`TAG` comes from `compose/<app>/.env` written by `pwa-deploy`. `0.0.0.0` inside
+the container is fine; the host side is `127.0.0.1` only.

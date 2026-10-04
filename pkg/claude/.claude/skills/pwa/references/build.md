@@ -13,8 +13,13 @@ service worker and the gotchas that already cost time once.
 
 ## Order
 
+0. **Dev server first, and keep it up** — pick a free `PB_PORT` for this app
+   (apps clash on 8090), start `PB_PORT=<port> scripts/dev-server.sh` and
+   `PB_PORT=<port> pnpm dev` in the background, seed demo data, and give the
+   user `http://localhost:5173` + the demo login right away. Both stay running
+   until the build ends, so the user can look at every change live.
 1. **Skeleton** — scaffold with the official tools (stack.md), pin versions,
-   dev scripts, tokens in `app.css` from day one, sign-in, empty state,
+   dev scripts, tokens in `app.css` from day one, landing (signed-out `/`), sign-in, empty state,
    manifest + icons + service worker. Production build served by PocketBase
    locally must work before any feature.
 2. **Contracts first** — shared types and the data API (`data.svelte.ts`),
@@ -37,22 +42,27 @@ service worker and the gotchas that already cost time once.
 1. `pnpm check` (0 errors, 0 warnings) + `pnpm test`.
 2. Rules test against a running PocketBase.
 3. Seed realistic data (`scripts/seed-demo.mjs`, ~a year, deterministic).
-4. Drive the real UI at phone size (390×844), **light and dark**, and **look
-   at the screenshots** — overflow, clipped labels, bad dates, wrong signs
-   only show up here. Also desktop width once.
+4. Drive the real UI and **look at the screenshots** at 390×844 (**light and
+   dark**), 900 and 1440 wide — overflow, clipped labels, bad dates, wrong
+   signs and a thin desktop strip only show up here.
 5. Failure paths for real: server stopped (not just devtools offline — an open
    connection can fake a pass), reload offline, error → visible message with
    retry (never a blank page), 401 → sign-in.
-6. Playwright e2e (Pixel 7 profile): the core loop + the failure path, against
-   the production build served by PocketBase.
-7. Lighthouse PWA/accessibility pass on the main screen if a landing page exists.
+6. Playwright e2e (Pixel 7 profile): one test per feature + the failure path,
+   against the production build served by PocketBase.
+7. If the app does money or time math: one hand-checked **scenario test**
+   (a scripted year of real use) asserting the expected totals per month.
+8. Lighthouse PWA/accessibility pass on the landing and the main screen —
+   run it, don't skip it.
 
 Every bug: fix the cause, rerun, and keep a list for the report.
 
 ## Finish
 
 - `README.md`: one-paragraph what, stack, develop, test, deploy commands.
-- `scripts/deploy.sh` + `deploy/compose.yaml` ready (see deploy.md), not run.
+- `scripts/deploy.sh` (a call to the homelab `pwa-deploy <app>`) +
+  `deploy/compose.yaml` ready (see deploy.md), not run.
+- Stop the dev servers you started (by PID).
 - Plan status → `built <date>`.
 - Report: what exists per screen, test counts, bugs found and fixed, what is
   **not** verified (real iPhone, camera, HEIC…), git status (uncommitted
