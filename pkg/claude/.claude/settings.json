@@ -15,7 +15,10 @@
       "Read(**/.env)",
       "Read(**/.env.*)"
     ],
-    "defaultMode": "auto"
+    "defaultMode": "auto",
+    "allow": [
+      "Bash(ssh homelab *)"
+    ]
   },
   "hooks": {
     "SessionStart": [
