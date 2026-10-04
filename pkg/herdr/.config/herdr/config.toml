@@ -57,7 +57,7 @@ tab_bar_right = [{ type = "zoom" }, { type = "hostname" }]
 # Claude Code writes a content-derived OSC title per session; show it instead
 # of a generic "claude" label so agents are identified by what they're doing.
 [ui.sidebar.agents.rows_by_agent]
-claude = [["state_icon", "workspace", "terminal_title_stripped"]]
+claude = [["state_icon", "workspace", { token = "terminal_title_stripped", fg = "#c8ccd4", dim = false }]]
 
 # Spaces on one line too, mirroring the agent row: status, where, what.
 [ui.sidebar.spaces]
