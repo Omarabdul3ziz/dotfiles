@@ -27,16 +27,7 @@
         "hooks": [
           {
             "type": "command",
-            "command": "~/.claude/hooks/cbm-session-reminder"
-          }
-        ]
-      },
-      {
-        "matcher": "*",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "bash '/home/omar/.claude/hooks/herdr-agent-state.sh' session",
+            "command": "bash \"$HOME/.claude/hooks/herdr-agent-state.sh\" session",
             "timeout": 10
           }
         ]
@@ -101,7 +92,7 @@
       "**Protected IaC scopes**: IAM, RBAC, networking, quota, and node-pool resources; anything whose name or tag carries prod or production as a whole word or name segment",
       "### User-specific",
       "**Primary use of Claude Code**: software development (Go monorepo — ExOra, EGX research/advisory app split into fuse/oracle/app services)",
-      "**Trusted repo**: /home/omar/src/omarz/exora (working directory) and its origin remote github.com:Omarabdul3ziz/exora.git — visibility unverified, treat as private per shipped default",
+      "**Trusted repo**: ~/src/omarz/exora (working directory) and its origin remote github.com:Omarabdul3ziz/exora.git — visibility unverified, treat as private per shipped default",
       "**Org-specific CLIs**: None configured — project uses standard go, make, docker, sqlc tooling plus repo-local ./bin/fuse and ./bin/oracle binaries",
       "routine under this repo's Makefile targets (build, test, lint, sqlc, migrate-new, fuse, fuse-api, oracle, run, up/down/logs) is ordinary dev work"
     ]
