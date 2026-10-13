@@ -11,15 +11,16 @@
     "pr": ""
   },
   "permissions": {
+    "allow": [
+      "Bash(ssh homelab *)"
+    ],
     "deny": [
       "Read(**/.env)",
       "Read(**/.env.*)"
     ],
-    "defaultMode": "auto",
-    "allow": [
-      "Bash(ssh homelab *)"
-    ]
+    "defaultMode": "auto"
   },
+  "model": "opus",
   "hooks": {
     "SessionStart": [
       {
@@ -53,10 +54,12 @@
       }
     }
   },
+  "viewMode": "focus",
   "spinnerTipsEnabled": false,
   "promptSuggestionEnabled": false,
   "askUserQuestionTimeout": "5m",
   "tui": "fullscreen",
+  "showThinkingSummaries": false,
   "skipDangerousModePermissionPrompt": true,
   "theme": "dark-ansi",
   "preferredNotifChannel": "notifications_disabled",
