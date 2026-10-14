@@ -7,7 +7,11 @@ bad()  { printf '  FAIL  %s\n' "$1"; fail=1; }
 warn() { printf '  warn  %s\n' "$1"; }
 
 echo "deps"
-for c in foot fish herdr claude lazygit glow helix delta jq git python3; do
+# foot and the hyprland section only apply on the Omarchy desktop; a headless
+# box (no Hyprland installed) skips them.
+desktop=; command -v Hyprland >/dev/null 2>&1 && desktop=1
+[ -n "$desktop" ] && deskdeps=foot
+for c in $deskdeps fish herdr claude lazygit glow helix delta jq git python3; do
   command -v "$c" >/dev/null 2>&1 && ok "$c" || bad "$c missing"
 done
 
@@ -67,6 +71,9 @@ echo "hooks"
   && ok "herdr-agent-state.sh" || bad "run: herdr integration install claude"
 
 echo "hyprland"
+if [ -z "$desktop" ]; then
+  warn "Hyprland not installed -- desktop checks skipped"
+else
 # hyprland.lua is Omarchy's own loader, deliberately NOT tracked: an upgrade
 # rewrites it, and a rewrite replaces a symlink with a real file. Only the hook
 # into overrides.lua is ours, so verify the hook survived the last upgrade.
@@ -83,6 +90,7 @@ fi
 grep -q '77\.42\.4\.14' "$HOME/.config/hypr/overrides.lua" 2>/dev/null \
   && bad "a private host is hardcoded in overrides.lua -- move it to ~/.env" \
   || ok "no hardcoded remote host"
+fi
 
 echo "stow"
 if command -v stow >/dev/null 2>&1; then

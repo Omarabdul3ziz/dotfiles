@@ -20,7 +20,7 @@
     ],
     "defaultMode": "auto"
   },
-  "model": "opus",
+  "model": "opus[1m]",
   "hooks": {
     "SessionStart": [
       {
@@ -52,12 +52,19 @@
         "source": "github",
         "repo": "Omarabdul3ziz/resume-forge"
       }
+    },
+    "claude-plugins-official": {
+      "source": {
+        "source": "github",
+        "repo": "anthropics/claude-plugins-official"
+      }
     }
   },
   "viewMode": "focus",
   "spinnerTipsEnabled": false,
   "promptSuggestionEnabled": false,
   "askUserQuestionTimeout": "5m",
+  "autoUpdatesChannel": "stable",
   "tui": "fullscreen",
   "showThinkingSummaries": false,
   "skipDangerousModePermissionPrompt": true,
