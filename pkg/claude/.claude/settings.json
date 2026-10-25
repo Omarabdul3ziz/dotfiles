@@ -85,5 +85,6 @@
       "Local builds, service restarts of the user's own stack (lab build --restart, hero_proc), and git work on local branches are routine dev work."
     ]
   },
-  "//": "stop co-author claude"
+  "//": "stop co-author claude",
+  "outputStyle": "plain"
 }
