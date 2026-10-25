@@ -134,10 +134,10 @@ Adding a shared alias or PATH entry means editing one file, not three.
   `secrets/`, `*.gpg` and `*.age` are gitignored; `env.example` carries key
   names only. Back `~/.env` up outside the repo with
   `make env-backup DEST=...`.
-- `~/.claude/CLAUDE.md` belongs to `lab skills sync`, which rewrites everything
-  above its `<!-- personal:begin -->` marker. Personal rules live in
-  `pkg/claude/.claude/personal.md`, stowed to `~/.claude/personal.md` and pulled
-  in by an `@~/.claude/personal.md` line under that marker.
+- `~/.claude/CLAUDE.md` is hand-written; `lab skills sync` is off
+  (`LAB_NO_SKILLS_SYNC=1` in `pkg/shell/.config/shell/env`). Personal rules live
+  in `~/hero/code/hero_brain/CLAUDE.md`, imported under its
+  `<!-- personal:begin -->` marker.
 - This is an Omarchy (Arch) machine. There is no bootstrap installer — Omarchy
   is it. Do not reintroduce apt/snap setup scripts.
 - After changing `PKGS` or adding files, run `make apply && make ade-check`.

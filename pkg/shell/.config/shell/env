@@ -4,3 +4,4 @@
 EDITOR=nvim
 VISUAL=nvim
 PAGER=less
+LAB_NO_SKILLS_SYNC=1
