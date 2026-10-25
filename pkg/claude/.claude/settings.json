@@ -16,7 +16,10 @@
     ],
     "deny": [
       "Read(**/.env)",
-      "Read(**/.env.*)"
+      "Read(**/.env.*)",
+      "Bash(lab skills sync*)",
+      "Bash(lab skills fix*)",
+      "Bash(lab skills edit*)"
     ],
     "defaultMode": "auto"
   },
