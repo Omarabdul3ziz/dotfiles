@@ -501,9 +501,11 @@ export default class Board extends View {
         c.title = s.name || s.sessionId.slice(0, 8);
       }
     }
-    // A live agent no work item names gets a card of its own.
+    // A live agent no work item names gets a card of its own. Only one that reports a status:
+    // a terminal viewing a background session (claude attach, claude agents) reports none,
+    // and that session already has its card.
     const held = new Set([...byKey.values(), ...loose].map((c) => c.agent?.address));
-    for (const r of live) if (!held.has(r.address)) Object.assign(card(null, null), { agent: r, title: r.title || r.name });
+    for (const r of live) if (r.status && !held.has(r.address)) Object.assign(card(null, null), { agent: r, title: r.title || r.name });
     const all = [...byKey.values(), ...loose].filter((c) => c.title);
     for (const c of all) {
       c.kind = c.pr ? "pr" : c.issue ? "issue" : c.line ? "idea" : "agent";
@@ -545,11 +547,10 @@ export default class Board extends View {
     const tags = [
       c.issue && c.issue.item,
       c.pr && `PR #${c.pr.n}`,
-      c.work && `work: ${c.work.stop}`,
+      c.work?.stop && `work: ${c.work.stop}`,
       c.state && (c.session ? `claude ${c.state}` : c.state),
-      c.src && where(c.src),
-      !c.src && c.agent?.machine,
     ].filter(Boolean);
+    const machine = c.src ? where(c.src) : (c.agent?.machine ?? "local");
     const open = c.agent
       ? () => this.openAgent(c.agent)
       : c.session?.pid
@@ -592,7 +593,11 @@ export default class Board extends View {
               .gap(6)
               .items_center()
               .text_size(11)
-              .child(div().flex_none().px(5).rounded(4).bg(color).text_color(t.background).child(c.kind))
+              .child(
+                machine === "local"
+                  ? div().flex_none().px(5).rounded(4).border_1().border_color(t.border).text_color(t.dim).child(machine)
+                  : div().flex_none().px(5).rounded(4).bg(t.ansi6).text_color(t.background).child(machine),
+              )
               .child(div().truncate().text_color(t.dim).child(tags.join(" · "))),
           )
           .when(Boolean(c.work?.now), (el) => el.child(div().text_size(11).truncate().text_color(t.muted).child(c.work.now)))
@@ -750,32 +755,36 @@ export default class Board extends View {
       )
       .when(done.length > 0, (el) =>
         el.child(
-          v_flex()
+          h_flex()
+            .id("done-toggle")
+            .flex_none()
+            .self_start()
+            .gap(6)
+            .px(10)
+            .py(4)
+            .rounded(8)
+            .bg(t.chrome)
+            .text_size(12)
+            .cursor_pointer()
+            .on_click((_e, cx) => {
+              this.doneOpen = !this.doneOpen;
+              cx.notify();
+            })
+            .child(div().text_color(t.dim).child(this.doneOpen ? "▾" : "▸"))
+            .child(div().font_semibold().text_color(t.muted).child("done"))
+            .child(div().text_color(t.dim).child(String(done.length))),
+        ),
+      )
+      .when(Boolean(this.doneOpen) && done.length > 0, (el) =>
+        el.child(
+          h_flex()
             .id("done")
             .flex_none()
             .max_h(150)
-            .p(8)
+            .flex_wrap()
             .gap(8)
-            .rounded(10)
-            .bg(t.chrome)
             .overflow_y_scrollbar()
-            .child(
-              h_flex()
-                .id("done-toggle")
-                .gap(6)
-                .text_size(12)
-                .cursor_pointer()
-                .on_click((_e, cx) => {
-                  this.doneOpen = !this.doneOpen;
-                  cx.notify();
-                })
-                .child(div().text_color(t.dim).child(this.doneOpen ? "▾" : "▸"))
-                .child(div().font_semibold().text_color(t.muted).child("done"))
-                .child(div().text_color(t.dim).child(String(done.length))),
-            )
-            .when(Boolean(this.doneOpen), (el) =>
-              el.child(h_flex().flex_wrap().gap(8).children(done.map((c) => div().w(280).child(this.cardView(t, c, all.indexOf(c)))))),
-            ),
+            .children(done.map((c) => div().w(260).child(this.cardView(t, c, all.indexOf(c))))),
         ),
       )
       .child(this.dispatcher(t, live));
