@@ -8,7 +8,7 @@ every machine. `make agents` (or `make apply`) builds it.
 | Layer | Answers | Lives in |
 |---|---|---|
 | persona | how I think, decide and report | `persona.md` |
-| skills | what I can ask for by name | `skills/` (work, criticize, digest) |
+| skills | what I can ask for by name | `skills/` (work, criticize) |
 | packs | what a domain needs: its rules, skills, scripts, memory | their own repo, listed in `~/.config/agents/packs` |
 | adapters | the few lines only one harness understands | `adapters/<harness>.md` |
 
@@ -32,8 +32,8 @@ A pack is a directory with any of `rules.md`, `INDEX.md`, `skills/<name>/`.
 List one per line in `~/.config/agents/packs` (machine-local, not tracked):
 
 ```
-~/src/omarz/homelab          # jarvis: pwa
-~/hero/code/hero_brain       # devbox: Hero rules, catchup, tidy, stack, raise
+~/src/omarz/homelab          # jarvis: PWA work settings, pwa
+~/hero/code/hero_brain       # devbox: Hero rules, catchup, repos, stack, raise
 ```
 
 ## Adding things
