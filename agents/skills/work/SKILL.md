@@ -17,6 +17,12 @@ repo's own build and tests.
 branch, worktree, session, and `now: <doing> · next: <step>`, rewritten at every
 step. `plan.md` holds the approved plan. A stopped agent resumes from these.
 
+**One chain.** An idea becomes an issue, the issue an agent, the agent a branch
+or PR; the board shows the chain as one card and it closes as one. So `item:`
+is the issue ref (`repo#n`) or the idea line, exactly, and `session:` is this
+session (per the harness adapter), written at step 2. Every link broken is a
+card left behind.
+
 **Several items** ("work A, B", "start …"): one background agent per item running
 `work <item>`, if the harness can; otherwise one after another. More than three
 writing at once → say so: my review is the bottleneck, not the agents.
@@ -24,6 +30,8 @@ writing at once → say so: my review is the bottleneck, not the agents.
 
 ## Stop 1 · plan
 1. Ground: the item is real, mine, and not already fixed. Otherwise stop and say so.
+   An idea that names a repo with an issue tracker: open the issue first, make it
+   the item, and put `repo#n` at the front of the idea line so both stay linked.
 2. Worktree and branch, per settings. Reuse one that already exists.
 3. Before: reproduce it for real, with the exact command and output. Cannot →
    one line why, plus a failing test.
@@ -50,7 +58,9 @@ writing at once → say so: my review is the bottleneck, not the agents.
     one line back to me), rebuild, retest, run the pre-push checks,
     fast-forward the base, remove the worktree and branch. Push only on
     "merge and push".
-11. `state.md` → merged. One line: `merged <repo> <sha> · pushed|not pushed`.
+11. Close the chain: remove the idea line, close the issue with the merge sha
+    (the pack says how for its forge), `state.md` → merged. One line:
+    `merged <repo> <sha> · pushed|not pushed · closed <what>`.
     A lesson worth keeping → ask once: "memorize: <lesson>?"
 
 Never commit on the base branch, widen scope, guess a conflict, push red, or
