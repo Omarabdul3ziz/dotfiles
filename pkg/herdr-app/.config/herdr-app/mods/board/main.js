@@ -761,12 +761,21 @@ export default class Board extends View {
             .overflow_y_scrollbar()
             .child(
               h_flex()
+                .id("done-toggle")
                 .gap(6)
                 .text_size(12)
+                .cursor_pointer()
+                .on_click((_e, cx) => {
+                  this.doneOpen = !this.doneOpen;
+                  cx.notify();
+                })
+                .child(div().text_color(t.dim).child(this.doneOpen ? "▾" : "▸"))
                 .child(div().font_semibold().text_color(t.muted).child("done"))
                 .child(div().text_color(t.dim).child(String(done.length))),
             )
-            .child(h_flex().flex_wrap().gap(8).children(done.map((c) => div().w(280).child(this.cardView(t, c, all.indexOf(c)))))),
+            .when(Boolean(this.doneOpen), (el) =>
+              el.child(h_flex().flex_wrap().gap(8).children(done.map((c) => div().w(280).child(this.cardView(t, c, all.indexOf(c)))))),
+            ),
         ),
       )
       .child(this.dispatcher(t, live));
