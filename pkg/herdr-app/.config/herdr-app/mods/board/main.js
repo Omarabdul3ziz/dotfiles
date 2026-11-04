@@ -7,15 +7,16 @@
 //
 // The composer at the bottom is the dispatcher: what I type or say goes to a quick Haiku call
 // that routes it (inbox it, start an agent, or operate a running one), shows where, and does it
-// on a second Enter. Running agents of every machine and any tool are the list on the left.
+// on a second Enter. Running agents of every machine and any tool are cards too; a live
+// agent's status picks its column. Done work sits in a box under the columns.
 
-import { View, div, svg, image } from "gpui-kit";
+import { View, div, svg } from "gpui-kit";
 import { v_flex, h_flex, InputState, Input } from "gpui-base";
 import { agents, terminals, panes, spaces, machines, knownAgents, exec, hc, home, appHome, run, notify, shared, setShared, theme, props, closeOverlay } from "herdr";
 import * as fs from "fs/promises";
 
 const FORGE = "https://forge.ourworld.tf";
-const COLUMNS = ["backlog", "planned", "working", "review", "done"];
+const COLUMNS = ["todo", "doing", "attention"];
 const KINDS = ["idea", "issue", "pr", "agent"];
 // dir: the pack's var dir under $HOME; code: where its checkouts live; audit: has hero_brain;
 // ideas: keeps ideas.md, the ideas typed into this board (nothing else writes it).
@@ -95,17 +96,16 @@ const SCHEMA = JSON.stringify({
 });
 
 const LIVE_RANK = { blocked: 4, done: 3, working: 2, idle: 1 };
-const LIVE_SECTION = { 4: "Needs you", 3: "Done", 2: "Working", 1: "Idle" };
 const machineOf = (addr) => (addr.includes("/") ? addr.split("/")[0] : null);
 
 const where = (src) => src.machine ?? "local";
 
 function workColumn(stop) {
-  if (stop === "plan") return "planned";
-  if (stop === "build" || stop === "blocked") return "working";
+  if (stop === "plan") return "todo";
+  if (stop === "build") return "doing";
   if (stop === "merged" || stop === "done") return "done";
   if (stop === "dropped") return null;
-  return "review"; // ready, or anything else waiting on me
+  return "attention"; // ready, blocked, or anything else waiting on me
 }
 
 // "org/repo#12", "repo#12" and "repo: #12 …" all name issue 12 of repo.
@@ -501,18 +501,22 @@ export default class Board extends View {
         c.title = s.name || s.sessionId.slice(0, 8);
       }
     }
+    // A live agent no work item names gets a card of its own.
+    const held = new Set([...byKey.values(), ...loose].map((c) => c.agent?.address));
+    for (const r of live) if (!held.has(r.address)) Object.assign(card(null, null), { agent: r, title: r.title || r.name });
     const all = [...byKey.values(), ...loose].filter((c) => c.title);
     for (const c of all) {
       c.kind = c.pr ? "pr" : c.issue ? "issue" : c.line ? "idea" : "agent";
       const state = c.session ? (c.session.pid ? (c.session.state ?? c.session.status) : "exited") : c.agent?.status;
       c.state = state;
       c.blocked = c.work?.stop === "blocked" || state === "blocked";
-      if (c.work) c.col = c.work.col;
-      else if (c.pr) c.col = "review";
-      else if (c.issue) c.col = c.issue.verdict === "in flight" ? "working" : "backlog";
-      else if (c.line) c.col = "backlog";
-      else if (state === "exited") c.col = "done";
-      else c.col = state === "working" || state === "busy" || state === "blocked" ? "working" : "review";
+      // A live agent's status wins: finished or asking means it waits on me; idle means never run yet.
+      if (c.work?.col === "done" || (!c.work && state === "exited")) c.col = "done";
+      else if (c.agent || c.session?.pid) c.col = state === "blocked" || state === "done" ? "attention" : "doing";
+      else if (c.work) c.col = c.work.col;
+      else if (c.pr) c.col = "attention";
+      else if (c.issue) c.col = c.issue.verdict === "in flight" ? "doing" : "todo";
+      else c.col = "todo";
     }
     return { all, strip };
   }
@@ -544,6 +548,7 @@ export default class Board extends View {
       c.work && `work: ${c.work.stop}`,
       c.state && (c.session ? `claude ${c.state}` : c.state),
       c.src && where(c.src),
+      !c.src && c.agent?.machine,
     ].filter(Boolean);
     const open = c.agent
       ? () => this.openAgent(c.agent)
@@ -655,43 +660,12 @@ export default class Board extends View {
         .child(r ? "⏎ go · Tab next · Esc clear" : "Enter shows where it goes · nothing happens until a second Enter · “idea: …” goes straight to the inbox"));
   }
 
-  agentsPanel(t, live) {
-    const rows = [];
-    let last = null;
-    for (const r of live) {
-      if (r.rank !== last) {
-        const n = live.filter((x) => x.rank === r.rank).length;
-        rows.push(h_flex().px(8).pt(10).pb(4).gap(6).text_size(11.5).font_semibold()
-          .child(div().text_color(r.rank === 4 ? t.blocked : t.muted).child(LIVE_SECTION[r.rank]))
-          .child(div().text_color(t.dim).child(String(n))));
-      }
-      last = r.rank;
-      const p = r.x.program;
-      const pic = p?.icon ? (p.tint ? svg(p.icon).size(16).text_color(t.foreground) : image(p.icon).w(16).h(16)) : div().w(16);
-      rows.push(h_flex().id(`ag-${r.address}`).px(8).py(6).gap(10).rounded(8).items_center().flex_none().cursor_pointer()
-        .hover((s) => s.bg(t.hover)).on_click(() => this.openAgent(r))
-        .child(this.status(t, r.status))
-        .child(div().flex_none().child(pic))
-        .child(v_flex().flex_1().min_w(0)
-          .child(div().truncate().text_color(t.foreground).child(r.name))
-          .child(div().truncate().text_size(11.5).text_color(t.dim)
-            .child(r.title || [p?.name ?? "agent", r.status].filter(Boolean).join(" · "))))
-        .child(div().flex_none().px(6).rounded(4).bg(t.raised).text_size(10.5).text_color(t.dim).child(r.machine))
-        .when(!r.pane, (el) => el.child(div().flex_none().text_size(10.5).text_color(t.dim).tooltip("No pane yet: click gives it a tab").child("◌"))));
-    }
-    return v_flex().id("agents").w(330).flex_none().h_full().p(8).rounded(10).bg(t.chrome).overflow_y_scrollbar()
-      .child(h_flex().px(8).pt(2).gap(6).items_center()
-        .child(div().font_semibold().text_color(t.foreground).child("Agents"))
-        .child(div().text_size(12).text_color(t.dim).child(`${live.length} · every machine`)))
-      .children(rows)
-      .when(live.length === 0, (el) => el.child(div().px(8).py(10).text_size(12).text_color(t.dim).child("Nothing running. Type a task above.")));
-  }
-
   render() {
     const t = theme();
     const { all, strip } = this.cards();
     const live = this.live();
     const shown = all.filter((c) => !this.only || c.kind === this.only);
+    const done = shown.filter((c) => c.col === "done");
     const color = { idea: t.ansi5, issue: t.ansi2, pr: t.ansi4, agent: t.ansi3 };
     const err = this.error ?? this.loadError;
     return v_flex()
@@ -750,7 +724,6 @@ export default class Board extends View {
           .flex_1()
           .min_h(0)
           .gap(10)
-          .child(this.agentsPanel(t, live))
           .children(
             COLUMNS.map((col) => {
               const mine = shown.filter((c) => c.col === col);
@@ -774,6 +747,27 @@ export default class Board extends View {
                 .children(mine.map((c) => this.cardView(t, c, all.indexOf(c))));
             }),
           ),
+      )
+      .when(done.length > 0, (el) =>
+        el.child(
+          v_flex()
+            .id("done")
+            .flex_none()
+            .max_h(150)
+            .p(8)
+            .gap(8)
+            .rounded(10)
+            .bg(t.chrome)
+            .overflow_y_scrollbar()
+            .child(
+              h_flex()
+                .gap(6)
+                .text_size(12)
+                .child(div().font_semibold().text_color(t.muted).child("done"))
+                .child(div().text_color(t.dim).child(String(done.length))),
+            )
+            .child(h_flex().flex_wrap().gap(8).children(done.map((c) => div().w(280).child(this.cardView(t, c, all.indexOf(c)))))),
+        ),
       )
       .child(this.dispatcher(t, live));
   }
