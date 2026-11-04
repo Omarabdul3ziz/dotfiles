@@ -20,6 +20,7 @@ step. `plan.md` holds the approved plan. A stopped agent resumes from these.
 **Several items** ("work A, B", "start …"): one background agent per item running
 `work <item>`, if the harness can; otherwise one after another. More than three
 writing at once → say so: my review is the bottleneck, not the agents.
+"merge everything ready" → stop 3 for every item at ready, one at a time.
 
 ## Stop 1 · plan
 1. Ground: the item is real, mine, and not already fixed. Otherwise stop and say so.
