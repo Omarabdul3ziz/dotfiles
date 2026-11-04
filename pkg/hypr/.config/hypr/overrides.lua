@@ -41,6 +41,10 @@ if herdr_remote then
 end
 
 -- Captures
+-- Herdr app board: agents of every machine + the dispatcher line, from anywhere. Focus first: the popup closes when the window isn't focused.
+o.bind("SUPER + A", "Board (Herdr dispatcher)",
+  "omarchy-launch-or-focus herdr-app && sleep 0.3 && herdr-app do mod.open --name board")
+
 o.bind("F8", "Screenshot", "omarchy-capture-screenshot")
 o.bind("ALT + F8", "Screenrecording", "omarchy-menu screenrecord")
 o.bind("SUPER + F8", "Color picker", "pkill hyprpicker || hyprpicker -a")

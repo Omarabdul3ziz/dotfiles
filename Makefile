@@ -1,6 +1,6 @@
 # Which packages are linked into $HOME. This line is the profile: everything
 # under pkg/ is tracked, only what is listed here is active.
-PKGS := core shell fish claude hypr herdr ghostty nvim helix tui
+PKGS := core shell fish claude hypr herdr herdr-app ghostty nvim helix tui
 
 # Off by default, kept for reference: zsh zellij tmux alacritty
 #   make on  PKG=zellij
