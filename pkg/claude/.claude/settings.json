@@ -77,15 +77,22 @@
       "Bash(make image-push:*)"
     ],
     "environment": [
-      "**Primary use of Claude Code**: Rust development on the Hero stack (repos under ~/hero/code, orgs lhumina_code and geomind_code on forge.ourworld.tf), plus a Go side project (exora).",
+      "**Primary use of Claude Code**: two machines. jarvis (Omarchy laptop): personal projects under ~/src/omarz (Go, TypeScript, PocketBase PWAs) deployed to the homelab over tailscale. devbox (Ubuntu): Rust development on the Hero stack (repos under ~/hero/code, orgs lhumina_code and geomind_code on forge.ourworld.tf).",
       "**Source control**: forge.ourworld.tf over SSH (lhumina_code, geomind_code, omarz) and github.com/Omarabdul3ziz. Local worktrees under ~/hero/var/worktrees are ordinary dev work.",
       "**Org-specific CLIs**: lab (builds, repos, services, secrets), hero_proc (process manager and secret store), herdr (terminal), claude agents (background sessions).",
       "**Secrets management**: hero_proc secret store; forge API token read inside the command that uses it, never printed. Project .env files hold API keys.",
-      "**Default / protected branches**: development is the working branch for hero repos; main and integration are release branches \u2014 no direct pushes there.",
+      "**Default / protected branches**: development is the working branch for hero repos; main and integration are release branches — no direct pushes there.",
       "**Sensitive remote targets**: anything named prod/production; shared GPU boxes and public brokers (restarts there need the user's okay).",
       "Local builds, service restarts of the user's own stack (lab build --restart, hero_proc), and git work on local branches are routine dev work."
     ]
   },
   "//": "stop co-author claude",
-  "outputStyle": "plain"
+  "voice": {
+    "enabled": true,
+    "mode": "tap",
+    "autoSubmit": false
+  },
+  "voiceEnabled": true,
+  "skipWorkflowUsageWarning": true,
+  "remoteControlAtStartup": true
 }

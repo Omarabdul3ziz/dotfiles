@@ -12,8 +12,9 @@
       "bindings": {
         "ctrl+shift+k": "chat:clearScreen",
         "ctrl+shift+x": "chat:killAgents",
-        "ctrl+shift+g": "command:commit"
+        "space": "voice:pushToTalk"
       }
     }
-  ]
+  ],
+  "$docs": "https://code.claude.com/docs/en/keybindings"
 }

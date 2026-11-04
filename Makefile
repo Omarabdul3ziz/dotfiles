@@ -11,11 +11,15 @@ PKGS := core shell fish claude hypr herdr ghostty nvim helix tui
 # ~/.config/hypr) would end up writing into git.
 STOW := stow --no-folding -d pkg -t $(HOME)
 
-.PHONY: apply delete adopt on off list ade-check print-pkgs env-backup env-restore desktop-export desktop-restore
+.PHONY: apply agents delete adopt on off list ade-check print-pkgs env-backup env-restore desktop-export desktop-restore
 
 apply:                      ## link PKGS into $HOME (idempotent, prunes stale links)
 	@$(STOW) -R $(PKGS)
 	@echo "linked: $(PKGS)"
+	@agents/install
+
+agents:                     ## rebuild agent instructions + skill links (see agents/README.md)
+	@agents/install
 
 delete:                     ## unlink PKGS
 	@$(STOW) -D $(PKGS)

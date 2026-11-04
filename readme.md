@@ -45,4 +45,7 @@ make ade-check
 Secrets are not in the repo. Restore `~/.env` with
 `make env-restore SRC=/path/env.gpg` from wherever you backed it up.
 
-See `CLAUDE.md` for the layout rules and `ADE.md` for the agent setup.
+`agents/` is the agent setup for every harness (Claude Code, pi, dsh, opencode,
+codex): one persona, a few skills, and packs. See `agents/README.md`.
+
+See `CLAUDE.md` for the layout rules and `ADE.md` for the terminal setup.
