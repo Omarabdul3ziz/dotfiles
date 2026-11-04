@@ -519,6 +519,10 @@ export default class Board extends View {
       else if (c.pr) c.col = "attention";
       else if (c.issue) c.col = c.issue.verdict === "in flight" ? "doing" : "todo";
       else c.col = "todo";
+      // One chain, one card: merged work that left its idea or issue open, or an agent
+      // working on no item, is a broken link to fix.
+      if (c.col === "done" && (c.line || c.issue)) c.broken = "not closed";
+      else if (c.col !== "done" && !c.work && (c.agent || c.session)) c.broken = "no item";
     }
     return { all, strip };
   }
@@ -598,7 +602,8 @@ export default class Board extends View {
                   ? div().flex_none().px(5).rounded(4).border_1().border_color(t.border).text_color(t.dim).child(machine)
                   : div().flex_none().px(5).rounded(4).bg(t.ansi6).text_color(t.background).child(machine),
               )
-              .child(div().truncate().text_color(t.dim).child(tags.join(" · "))),
+              .child(div().truncate().text_color(t.dim).child(tags.join(" · ")))
+              .when(Boolean(c.broken), (el) => el.child(div().flex_none().text_color(t.blocked).child(c.broken))),
           )
           .when(Boolean(c.work?.now), (el) => el.child(div().text_size(11).truncate().text_color(t.muted).child(c.work.now)))
           .when(actions.length > 0, (el) => el.child(h_flex().gap(2).text_size(12).child(div().flex_1()).children(actions))),
