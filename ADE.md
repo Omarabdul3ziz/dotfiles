@@ -1,5 +1,11 @@
 # ADE — Agentic Development Environment
 
+> **Superseded (2026-11-08).** The herdr TUI below is off (`pkg/herdr` is no
+> longer in `PKGS`, `herdr.service` disabled). Each machine runs one herdr-core
+> server (`hc`); herdr-app on this machine is the only client: one space per
+> machine, `[local | devbox] [tabs] [+]` in its bar. `SUPER+SHIFT+RETURN` opens
+> it, `SUPER+A` the board. The rest of this file describes the old setup.
+
 ## Overview
 
 One persistent Herdr session holds everything. Claude does the work; git review,

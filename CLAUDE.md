@@ -13,7 +13,7 @@ line at the top of the `Makefile` — that line is the profile.
 
 Everything under `pkg/` is tracked. Only what `PKGS` lists is linked. That is
 how alternatives for the same job coexist: `zellij`, `tmux` and `herdr` are all
-in the repo, only `herdr` is on.
+in the repo, none is on: `herdr-app` (on herdr-core) is the multiplexer.
 
 The repo root is for the repo: docs, `Makefile`, `scripts/` (repo tooling),
 `env.example`, `desktop/` (see below) and `agents/`. Nothing there is stowed;

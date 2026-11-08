@@ -1,8 +1,9 @@
-// Terminals layout's draggable top bar: space picker, tabs, and window controls.
+// Terminals layout's draggable top bar: machine switch, tabs, new tab, window controls.
+// One space per machine, so the bar never shows spaces.
 
 import { View, div, svg, image } from "gpui-kit";
 import { h_flex } from "gpui-base";
-import { spaces, panes, machines, run, theme, home, openOverlay, nextCommand, window as win } from "herdr";
+import { spaces, panes, machines, run, theme, openOverlay, nextCommand, window as win } from "herdr";
 
 const C = {
   tray: "#1d1f22",
@@ -15,12 +16,6 @@ const C = {
   text: "#e8e9eb",
   dim: "#8b8f95",
 };
-
-function folder(cwd) {
-  if (!cwd) return "";
-  const h = home();
-  return cwd === h ? "~" : cwd.startsWith(h + "/") ? "~" + cwd.slice(h.length) : cwd;
-}
 
 // The pane a tab's tab speaks for: the focused one, else its agent, else the first.
 function lead(all, id) {
@@ -157,7 +152,6 @@ export default class TerminalsBar extends View {
 
     const tab = (c) => {
       const p = lead(all, c.id);
-      const where = folder(p?.cwd);
       return own(h_flex())
         .id(`tm-${c.id}`)
         .flex_shrink(1)
@@ -179,14 +173,7 @@ export default class TerminalsBar extends View {
           openOverlay({ mod: "menu", kind: "popup", width: 200, props: { tab: "tab", target: { id: c.id, space: space.id } } }),
         )
         .child(tile(t, p))
-        .child(
-          h_flex()
-            .min_w(0)
-            .gap(6)
-            .truncate()
-            .child(div().flex_none().text_color(c.active ? C.text : "#c4c6ca").child(c.name))
-            .when(Boolean(where), (el) => el.child(div().truncate().text_color(C.dim).child(where))),
-        );
+        .child(div().min_w(0).truncate().text_color(c.active ? C.text : "#c4c6ca").child(c.name));
     };
 
     return h_flex()
@@ -196,25 +183,6 @@ export default class TerminalsBar extends View {
       // macOS: the window buttons sit here (the layout's traffic_lights).
       .when(w.platform === "macos" && w.titlebar === "none" && !w.fullscreen, (el) => el.pl(72))
       .when(Boolean(mbar), (el) => el.child(mbar))
-      .child(
-        own(h_flex())
-          .id("tm-space")
-          .flex_none()
-          .h(30)
-          .pl(10)
-          .pr(12)
-          .gap(8)
-          .items_center()
-          .rounded_full()
-          .bg(C.chip)
-          .cursor_pointer()
-          .text_size(13)
-          .text_color(C.dim)
-          .hover((s) => s.text_color(C.text))
-          .on_click(() => openOverlay({ mod: "picker", kind: "popup", at: "top", offset: 40, width: 640, height: 0.8 }))
-          .child(svg("mods/my-terminals-bar/stack.svg").size(15))
-          .child(div().max_w(160).truncate().text_color(C.text).child(space.name)),
-      )
       .child(
         h_flex()
           .flex_shrink(1)
@@ -226,10 +194,8 @@ export default class TerminalsBar extends View {
           .bg(C.tray)
           .children(space.tabs.map(tab)),
       )
-      .child(div().flex_1())
-      .child(iconButton("tm-board", "board", () => run("mod.open", { name: "board" })))
-      .child(iconButton("tm-keys", "command", () => run("app.palette")))
       .child(iconButton("tm-new", "plus", () => run("tab.new", { space: space.id })))
+      .child(div().flex_1())
       .when(Boolean(w.buttons), (el) =>
         el.child(
           h_flex()

@@ -28,17 +28,10 @@ o.bind("SUPER + SHIFT + G", "Telegram", { launch = "AyuGram", focus = "^AyuGram$
 
 -- Was: Browser
 hl.unbind("SUPER + SHIFT + RETURN")
-o.bind("SUPER + SHIFT + RETURN", "Herdr",
-  'setsid uwsm-app -- foot --working-directory="$(omarchy-cmd-terminal-cwd)" herdr')
+o.bind("SUPER + SHIFT + RETURN", "Herdr", "omarchy-launch-or-focus herdr-app")
 
--- Was: Herdr in the default terminal (foot); now the remote server session
+-- Was: Herdr in the default terminal (foot); devbox is a machine inside herdr-app now
 hl.unbind("SUPER + CTRL + RETURN")
-local herdr_remote = dotenv("HERDR_REMOTE")
-if herdr_remote then
-  o.bind("SUPER + CTRL + RETURN", "Herdr (server)",
-    'setsid uwsm-app -- foot herdr --remote ' .. herdr_remote ..
-    ' --remote-keybindings server')
-end
 
 -- Captures
 -- Herdr app board: agents of every machine + the dispatcher line, from anywhere. Focus first: the popup closes when the window isn't focused.
