@@ -73,17 +73,24 @@ function windowButton(id, icon, command) {
   );
 }
 
-function iconButton(id, icon, onClick) {
+// A text glyph, not an svg: the app skips svgs that are symlinks out of its
+// home, and every file here is stowed as one.
+function newTabButton(onClick) {
   return own(div())
-    .id(id)
+    .id("tm-new")
     .flex_none()
-    .p(7)
+    .w(30)
+    .h(30)
     .rounded(8)
+    .flex()
+    .items_center()
+    .justify_center()
+    .text_size(20)
     .text_color(C.dim)
     .cursor_pointer()
     .hover((s) => s.bg(C.chip).text_color(C.text))
     .on_click(onClick)
-    .child(svg(`mods/my-terminals-bar/${icon}.svg`).size(17));
+    .child("+");
 }
 
 function goMachine(machine) {
@@ -194,7 +201,7 @@ export default class TerminalsBar extends View {
           .bg(C.tray)
           .children(space.tabs.map(tab)),
       )
-      .child(iconButton("tm-new", "plus", () => run("tab.new", { space: space.id })))
+      .child(newTabButton(() => run("tab.new", { space: space.id })))
       .child(div().flex_1())
       .when(Boolean(w.buttons), (el) =>
         el.child(
