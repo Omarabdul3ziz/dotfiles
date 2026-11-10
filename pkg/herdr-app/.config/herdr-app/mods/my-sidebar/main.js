@@ -1,8 +1,9 @@
 // Terminals layout's sidebar: each machine with every terminal under it, flat.
 // One space per machine, so the list never shows spaces. A row is one terminal:
-// ▪ a shell or program, ◆ an agent, ◇ a sub-agent (a terminal another one started).
+// its program's icon, then the tab's name if someone named it, else the shell's
+// folder or the program's title. ↳ marks a sub-agent (a terminal another one started).
 
-import { View, div } from "gpui-kit";
+import { View, div, svg, image } from "gpui-kit";
 import { v_flex, h_flex } from "gpui-base";
 import { spaces, panes, terminals, machines, focused, run, theme, openOverlay, nextCommand } from "herdr";
 
@@ -14,6 +15,7 @@ const C = {
   chip: "#252628",
   text: "#e8e9eb",
   dim: "#8b8f95",
+  bg: "#131619",
 };
 
 // A control in the draggable sidebar: the press is its own, not the window's
@@ -41,15 +43,50 @@ function reachable() {
   return machines().filter((m) => m.name === null || m.layout !== "unavailable");
 }
 
-// program.agent is only set for agents that report their state, which the
-// `claude agents` dashboard does not, so known agent programs count too.
-const AGENTS = ["claude", "pi", "codex", "opencode", "gemini", "hermes", "amp"];
+// Agents the program table can't see: the `claude agents` dashboard reports no
+// state, and a machine without /proc (devbox) reports no foreground program, so
+// fall back to the agent's name in the title.
+const AGENTS = ["claude", "omp", "pi", "codex", "opencode", "gemini", "hermes", "amp"];
 
-function marker(t, pane) {
-  if (t.parent) return "◇";
+function program(t, pane) {
   const g = pane?.program ?? t.program;
-  const agent = g?.agent || t.status || AGENTS.includes(g?.key) || AGENTS.includes(t.foreground?.name);
-  return agent ? "◆" : "▪";
+  if (g && !g.shell) return g;
+  const title = (pane?.title ?? "").toLowerCase();
+  const key = AGENTS.find((a) => new RegExp(`\\b${a}\\b`).test(title));
+  return key ? { ...g, key, icon: `icons/${key === "omp" ? "pi" : key}.svg`, tint: false, tile: null } : g;
+}
+
+// The program's tile from the app's table: its glyph (or logo), and a dot when
+// its agent is busy, blocked or done.
+function tile(th, g, status) {
+  const dot = status && status !== "idle" ? th[status] : null;
+  return div()
+    .relative()
+    .flex_none()
+    .w(22)
+    .h(22)
+    .rounded(6)
+    .border_1()
+    .border_color("#ffffff14")
+    .bg(g?.tile ?? C.chip)
+    .flex()
+    .items_center()
+    .justify_center()
+    .when(Boolean(g?.icon), (el) =>
+      el.child(g.tint ? svg(g.icon).size(13).text_color(g.color ?? C.text) : image(g.icon).w(13).h(13)),
+    )
+    .when(Boolean(dot), (el) =>
+      el.child(div().absolute().top(-4).right(-4).w(10).h(10).rounded_full().border_2().border_color(C.bg).bg(dot)),
+    );
+}
+
+const home = (cwd) => (cwd ?? "").replace(/^\/home\/[^/]+/, "~");
+
+function label(t, pane, tab) {
+  if (tab?.named && tab.panes === 1) return tab.name;
+  const g = pane?.program ?? t.program;
+  if (g?.shell && pane?.cwd) return home(pane.cwd);
+  return pane?.title || t.name || t.address;
 }
 
 // One machine's live terminals: those in panes in tab order, each followed by the
@@ -86,7 +123,8 @@ export default class Sidebar extends View {
   }
 
   render() {
-    const t = theme();
+    const th = theme();
+    const tabs = spaces().flatMap((s) => s.tabs);
     const all = terminals();
     const byPane = panes().filter((p) => p.terminal);
     const shown = focused()?.terminal ?? null;
@@ -95,11 +133,10 @@ export default class Sidebar extends View {
     const row = (term) => {
       const pane = byPane.find((p) => p.terminal === term.address);
       const on = term.address === shown;
-      const live = pane?.status ?? term.status;
-      const status = live && live !== "idle" ? live : null;
+      const tab = tabs.find((c) => c.id === pane?.tab);
       return own(h_flex())
         .id(`ms-${term.address}`)
-        .h(30)
+        .h(32)
         .ml(6)
         .pl(8)
         .pr(8)
@@ -120,9 +157,9 @@ export default class Sidebar extends View {
           pane &&
           openOverlay({ mod: "menu", kind: "popup", width: 200, props: { tab: "tab", target: { id: pane.tab, space: spaceOf(machineOf(term.address))?.id } } }),
         )
-        .child(div().flex_none().w(12).text_color(C.dim).child(marker(term, pane)))
-        .child(div().flex_1().min_w(0).truncate().text_color(on ? C.text : "#c4c6ca").child(pane?.title || term.name || term.address))
-        .when(Boolean(status), (el) => el.child(div().flex_none().w(8).h(8).rounded_full().bg(t[status])));
+        .when(Boolean(term.parent), (el) => el.child(div().flex_none().text_color(C.dim).child("↳")))
+        .child(tile(th, program(term, pane), pane?.status ?? term.status))
+        .child(div().flex_1().min_w(0).truncate().text_color(on ? C.text : "#c4c6ca").child(label(term, pane, tab)));
     };
 
     const machine = (m) => {

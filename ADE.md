@@ -17,8 +17,11 @@ devbox and homelab. It owns the terminals; clients only show them.
 
 - **herdr-app** on the laptop is the only desktop client. Layout `my-terminals`:
   one space per machine, and the `my-sidebar` mod lists each machine with every
-  terminal under it, flat — `▪` shell or program, `◆` agent, `◇` sub-agent (a
-  terminal an agent started), plus a state dot.
+  terminal under it, flat: the program's icon (with a state dot), then the tab's
+  name if you named it, else the shell's folder or the program's title. `↳`
+  marks a sub-agent (a terminal an agent started). Name each machine's dashboard
+  tab `Claude Agents` (F2). Icons come from herdr-app's program table;
+  `programs.json` adds the ones it lacks (`omp`).
 - **The Herdr phone app** (iOS/Android) connects to each machine's `hc` over
   SSH. It only talks to herdr-core; the old herdr TUI is not supported, and is
   gone from every machine.
