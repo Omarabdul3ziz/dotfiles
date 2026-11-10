@@ -4,16 +4,16 @@
     "name": "terminals",
     "version": "0.1.11"
   },
-  "type": "column",
+  "type": "row",
   "children": [
     {
-      "id": "tabs",
+      "id": "sidebar",
       "type": "block",
       "content": {
-        "mod": "my-terminals-bar"
+        "mod": "my-sidebar"
       },
       "size": {
-        "px": 38
+        "px": 220
       },
       "window_drag": true
     },

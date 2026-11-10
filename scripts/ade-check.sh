@@ -23,6 +23,10 @@ hc server status >/dev/null 2>&1 && ok "herdr-core running" || bad "run: hc serv
 systemctl --user is-active herdr.service >/dev/null 2>&1 \
   && bad "herdr.service is back -- run: systemctl --user disable --now herdr.service" \
   || ok "no herdr TUI server"
+command -v herdr >/dev/null 2>&1 && bad "herdr TUI installed -- run: sudo pacman -Rns herdr" || ok "no herdr TUI binary"
+# Without lingering the user's systemd manager, and every terminal, dies with the last login.
+[ "$(loginctl show-user "$USER" -p Linger --value 2>/dev/null)" = yes ] \
+  && ok "lingering on" || bad "run: loginctl enable-linger $USER"
 
 echo "notifications"
 # Herdr notifies on its own from pane state; a Claude-side hook doubles it.

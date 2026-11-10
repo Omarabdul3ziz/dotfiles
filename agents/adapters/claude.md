@@ -1,6 +1,6 @@
 
 ## Claude Code only
-- Background agents run in herdr, any tool, any machine:
+- Background agents run in hc (herdr-core), any tool, any machine:
   `hc run --bg --no-parent --outlive-parent --name <name> --cwd <repo> [--on <machine>] claude "work <item>"`
   from the repo's main checkout. All of them, every machine: `hc ls`, or Super+A /
   Ctrl+Shift+A (the herdr-app `dispatch` popup). `session:` in `state.md` is the

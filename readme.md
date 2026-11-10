@@ -1,14 +1,14 @@
 # dotfiles
 
 Personal configuration, managed with GNU Stow. One package per tool under
-`pkg/`; each package is a `$HOME` tree, so `pkg/herdr/.config/herdr/config.toml`
-lands at `~/.config/herdr/config.toml`.
+`pkg/`; each package is a `$HOME` tree, so `pkg/zellij/.config/zellij/config.kdl`
+lands at `~/.config/zellij/config.kdl`.
 
 ```bash
 make apply           # link the active packages into ~
 make list            # show every package and whether it is on
 make on  PKG=zellij  # activate one
-make off PKG=herdr   # deactivate one
+make off PKG=zellij  # deactivate one
 make adopt           # first run on a new machine: absorb existing ~ files, then link
 make desktop-export  # snapshot omarchy plugins + customized vendor config
 make desktop-restore # put them back on a new machine
@@ -21,8 +21,8 @@ with `make desktop-export`. Run it after installing a plugin or rearranging the
 bar, then commit.
 
 The `PKGS` line in the `Makefile` is the profile — it decides what is linked.
-Everything else stays tracked but dormant, which is how `herdr`, `zellij` and
-`tmux` all live here while only one is active.
+Everything else stays tracked but dormant, which is how `zellij` and `tmux`
+live here while herdr-app is the multiplexer.
 
 Shared shell config (`env`, `path`, `aliases`) lives in `pkg/shell` and is read
 by bash, zsh and fish alike. Secrets stay in `~/.env`, which is gitignored;

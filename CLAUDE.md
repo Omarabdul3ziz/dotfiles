@@ -7,13 +7,13 @@ Guidance for Claude Code (claude.ai/code) working in this repository.
 Personal dotfiles managed with **GNU Stow**, one package per tool.
 
 **Every directory under `pkg/` is a `$HOME` tree.** A file's path inside its
-package is its path in `$HOME`: `pkg/herdr/.config/herdr/config.toml` becomes
-`~/.config/herdr/config.toml`. Which packages are actually linked is the `PKGS`
+package is its path in `$HOME`: `pkg/zellij/.config/zellij/config.kdl` becomes
+`~/.config/zellij/config.kdl`. Which packages are actually linked is the `PKGS`
 line at the top of the `Makefile` — that line is the profile.
 
 Everything under `pkg/` is tracked. Only what `PKGS` lists is linked. That is
-how alternatives for the same job coexist: `zellij`, `tmux` and `herdr` are all
-in the repo, none is on: `herdr-app` (on herdr-core) is the multiplexer.
+how alternatives for the same job coexist: `zellij` and `tmux` are both in the
+repo, neither is on: `herdr-app` (on herdr-core) is the multiplexer.
 
 The repo root is for the repo: docs, `Makefile`, `scripts/` (repo tooling),
 `env.example`, `desktop/` (see below) and `agents/`. Nothing there is stowed;
@@ -27,7 +27,7 @@ make agents          # only rebuild agent instructions + skill links
 make delete          # unlink them
 make adopt           # one-time: pull existing ~ files into the repo, then link
 make on  PKG=zellij  # activate one package
-make off PKG=herdr   # deactivate one package
+make off PKG=zellij  # deactivate one package
 make list            # every package, on or off
 make ade-check       # verify the ADE is installed on this machine (see ADE.md)
 make desktop-export  # snapshot omarchy plugins + customized vendor config into desktop/
@@ -44,7 +44,7 @@ into by Omarchy *through* the symlink, inside git. Per-file links cost one
 
 ## Only track what you actually override
 
-Omarchy, LazyVim and herdr all ship their own config into `$HOME`. Do not track
+Omarchy and LazyVim both ship their own config into `$HOME`. Do not track
 those files. Track the override, or the script that re-applies it.
 
 - `~/.config/hypr/` — only `overrides.lua` is stowed; Omarchy does not ship it
@@ -58,8 +58,6 @@ those files. Track the override, or the script that re-applies it.
 - `~/.config/hypr/monitors.lua` and `~/.config/omarchy/{shell.json,shell.toml,
   defaults/agent}` — same problem, but these are customized, so they are
   **snapshotted by copy** into `desktop/` (below), never stowed.
-- `~/.claude/hooks/*` — installed by `herdr integration install`. **Not
-  tracked**; `ade-check` verifies they exist.
 - `~/.config/nvim/lua/plugins/theme.lua` — an Omarchy symlink into
   `~/.local/state/omarchy/current/theme/`. **Not tracked**, recreated on theme
   switch.

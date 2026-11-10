@@ -1,6 +1,6 @@
 {
   "place": "none",
-  "title": "Terminals tabs",
+  "title": "Machines and tabs",
   "cloned_from": {
     "name": "terminals-bar",
     "version": "0.1.11"
