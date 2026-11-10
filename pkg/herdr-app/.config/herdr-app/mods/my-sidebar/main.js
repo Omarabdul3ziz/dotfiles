@@ -3,6 +3,7 @@
 // its program's icon, then the tab's name if someone named it, else the shell's
 // folder or the program's title. ↳ marks a sub-agent (a terminal another one started).
 // Hover shows × to close; drag a row onto another of the same machine to move its tab there.
+// A machine's header folds it; folded, it shows its most urgent agent state.
 
 import { View, div, svg, image } from "gpui-kit";
 import { v_flex, h_flex } from "gpui-base";
@@ -51,6 +52,17 @@ function open(term, pane) {
   if (pane) run("pane.focus", { terminal: term.address });
   else if (term.program?.agent || term.parent) run("agent.focus", { terminal: term.address });
   else run("terminal.peek", { terminal: term.address });
+}
+
+const URGENT = ["blocked", "done", "working"];
+const ICON = (name) => `mods/workspace-chrome/${name}.svg`;
+
+function loadFolded() {
+  try {
+    return new Set(JSON.parse(localStorage.getItem("machines.folded") ?? "[]"));
+  } catch {
+    return new Set();
+  }
 }
 
 function reachable() {
@@ -123,6 +135,7 @@ function rowsOf(machine, all, byPane) {
 
 export default class Sidebar extends View {
   init(_props, cx) {
+    this.folded = loadFolded();
     cx.spawn(async (cx) => {
       for (;;) {
         const c = await nextCommand();
@@ -215,47 +228,79 @@ export default class Sidebar extends View {
 
     const machine = (m) => {
       const key = m.name ?? "here";
+      const rows = rowsOf(m.name, all, byPane);
+      const folded = this.folded.has(key);
+      const up = m.layout !== "unavailable";
+      const states = rows.map((r) => byPane.find((p) => p.terminal === r.address)?.status ?? r.status);
+      const urgent = URGENT.find((u) => states.includes(u));
       return v_flex()
         .gap(2)
-        .when(m.layout === "unavailable", (el) => el.opacity(0.4))
         .child(
-          h_flex()
+          own(h_flex())
+            .id(`ms-machine-${key}`)
             .h(28)
-            .pl(6)
+            .pl(8)
+            .pr(4)
+            .gap(7)
             .items_center()
-            .child(
-              own(div())
-                .id(`ms-machine-${key}`)
-                .flex_1()
-                .cursor_pointer()
-                .text_size(12)
-                .text_color(m.name === here ? C.text : C.dim)
-                .hover((s) => s.text_color(C.text))
-                .when(m.layout === "loading", (el) => el.opacity(0.5))
-                .on_click(() => goMachine(m.name))
-                .child(m.name ?? "local"),
+            .rounded(7)
+            .cursor_pointer()
+            .text_size(12)
+            .text_color(m.name === here ? C.text : C.dim)
+            .hover((s) => s.bg(C.hover).text_color(C.text))
+            .when(m.layout === "loading", (el) => el.opacity(0.5))
+            .on_click((_e, cx) => {
+              folded ? this.folded.delete(key) : this.folded.add(key);
+              try {
+                localStorage.setItem("machines.folded", JSON.stringify([...this.folded]));
+              } catch {}
+              cx.notify();
+            })
+            .child(svg(ICON(m.name ? "server" : "monitor")).size(13).flex_none())
+            .child(div().flex_1().truncate().child(m.name ?? "local"))
+            .when(folded && rows.length > 0, (el) => el.child(div().flex_none().text_size(11).child(String(rows.length))))
+            .when(folded && Boolean(urgent), (el) => el.child(div().flex_none().w(7).h(7).rounded_full().bg(th[urgent])))
+            .when(!up, (el) => el.child(div().flex_none().text_size(11).child("offline")))
+            .when(up, (el) =>
+              el.child(
+                own(div())
+                  .id(`ms-new-${key}`)
+                  .w(22)
+                  .h(22)
+                  .rounded(6)
+                  .flex()
+                  .items_center()
+                  .justify_center()
+                  .text_color(C.dim)
+                  .hover((s) => s.bg(C.chip).text_color(C.text))
+                  .on_click((_e, cx) => {
+                    cx.stop_propagation();
+                    newTab(m.name);
+                  })
+                  .child(svg(ICON("plus")).size(12)),
+              ),
             )
-            // A text glyph, not an svg: the app skips svgs that are symlinks out of
-            // its home, and every file here is stowed as one.
-            .child(
-              own(div())
-                .id(`ms-new-${key}`)
-                .w(24)
-                .h(24)
-                .rounded(6)
-                .flex()
-                .items_center()
-                .justify_center()
-                .text_size(17)
-                .text_color(C.dim)
-                .cursor_pointer()
-                .hover((s) => s.bg(C.chip).text_color(C.text))
-                .on_click(() => newTab(m.name))
-                .child("+"),
-            ),
+            .child(div().flex_none().w(6).h(6).rounded_full().bg(up ? th.ansi2 : C.dim))
+            .child(svg(ICON(folded ? "chevron-right" : "chevron-down")).size(11).flex_none()),
         )
-        .children(rowsOf(m.name, all, byPane).map(row));
+        .when(!folded, (el) => el.children(rows.map(row)));
     };
+
+    const footRow = (id, icon, text, action) =>
+      own(h_flex())
+        .id(id)
+        .h(28)
+        .px(8)
+        .gap(9)
+        .items_center()
+        .rounded(8)
+        .cursor_pointer()
+        .text_size(13)
+        .text_color(C.dim)
+        .hover((s) => s.bg(C.hover).text_color(C.text))
+        .on_click(action)
+        .child(svg(ICON(icon)).size(14))
+        .child(text);
 
     return v_flex()
       .id("ms-tree")
@@ -265,10 +310,17 @@ export default class Sidebar extends View {
         cx.notify();
       })
       .size_full()
-      .pt(8)
-      .px(4)
-      .gap(14)
-      .overflow_y_scroll()
-      .children(machines().map(machine));
+      .child(v_flex().id("ms-list").flex_1().min_h(0).pt(8).px(4).gap(10).overflow_y_scroll().children(machines().map(machine)))
+      .child(
+        v_flex()
+          .flex_none()
+          .px(4)
+          .pt(4)
+          .pb(8)
+          .border_t_1()
+          .border_color("#ffffff0d")
+          .child(footRow("ms-settings", "settings", "Settings", () => run("app.settings")))
+          .child(footRow("ms-add-machine", "server", "Add machine", () => run("mod.open", { name: "machine-add" }))),
+      );
   }
 }
