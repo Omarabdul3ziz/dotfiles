@@ -2,6 +2,7 @@
 // One space per machine, so the list never shows spaces. A row is one terminal:
 // its program's icon, then the tab's name if someone named it, else the shell's
 // folder or the program's title. ↳ marks a sub-agent (a terminal another one started).
+// Hover shows × to close; drag a row onto another of the same machine to move its tab there.
 
 import { View, div, svg, image } from "gpui-kit";
 import { v_flex, h_flex } from "gpui-base";
@@ -37,6 +38,19 @@ function newTab(machine) {
   const space = spaceOf(machine);
   if (space) run("tab.new", { space: space.id });
   else run("space.new", { machine: machine ?? "" });
+}
+
+// The tab when it holds only this terminal, else just its pane; a sub-agent with no pane ends.
+function close(term, pane, tab) {
+  if (tab?.panes === 1) run("tab.close", { id: tab.id });
+  else if (pane) run("pane.close", { pane: pane.pane });
+  else run("terminal.kill", { terminal: term.address });
+}
+
+function open(term, pane) {
+  if (pane) run("pane.focus", { terminal: term.address });
+  else if (term.program?.agent || term.parent) run("agent.focus", { terminal: term.address });
+  else run("terminal.peek", { terminal: term.address });
 }
 
 function reachable() {
@@ -134,6 +148,7 @@ export default class Sidebar extends View {
       const pane = byPane.find((p) => p.terminal === term.address);
       const on = term.address === shown;
       const tab = tabs.find((c) => c.id === pane?.tab);
+      const target = this.pressed && this.pressed.address !== term.address && this.hovered === term.address;
       return own(h_flex())
         .id(`ms-${term.address}`)
         .h(32)
@@ -148,10 +163,25 @@ export default class Sidebar extends View {
         .text_size(13)
         .when(on, (el) => el.bg(C.row).border_color(C.rowEdge))
         .when(!on, (el) => el.border_color("#00000000").hover((s) => s.bg(C.hover)))
-        .on_click(() => {
-          if (pane) run("pane.focus", { terminal: term.address });
-          else if (term.program?.agent || term.parent) run("agent.focus", { terminal: term.address });
-          else run("terminal.peek", { terminal: term.address });
+        .when(target, (el) => el.border_color(th.accent))
+        .on_hover((hover, cx) => {
+          if (hover) this.hovered = term.address;
+          else if (this.hovered === term.address) this.hovered = null;
+          cx.notify();
+        })
+        .on_mouse_down("left", (_e, cx) => {
+          this.pressed = { address: term.address, tab };
+          cx.notify();
+        })
+        .on_mouse_up("left", (_e, cx) => {
+          const from = this.pressed;
+          this.pressed = null;
+          cx.notify();
+          // No press on this row (the × took it): nothing to do.
+          if (!from) return;
+          if (from.address === term.address) return open(term, pane);
+          const same = machineOf(from.address) === machineOf(term.address);
+          if (same && from.tab && tab && from.tab.id !== tab.id) run("tab.move", { id: from.tab.id, index: tab.index });
         })
         .on_mouse_down("right", () =>
           pane &&
@@ -159,7 +189,28 @@ export default class Sidebar extends View {
         )
         .when(Boolean(term.parent), (el) => el.child(div().flex_none().text_color(C.dim).child("↳")))
         .child(tile(th, program(term, pane), pane?.status ?? term.status))
-        .child(div().flex_1().min_w(0).truncate().text_color(on ? C.text : "#c4c6ca").child(label(term, pane, tab)));
+        .child(div().flex_1().min_w(0).truncate().text_color(on ? C.text : "#c4c6ca").child(label(term, pane, tab)))
+        .when(this.hovered === term.address && !this.pressed, (el) =>
+          el.child(
+            own(div())
+              .id(`ms-close-${term.address}`)
+              .flex_none()
+              .w(18)
+              .h(18)
+              .rounded(5)
+              .flex()
+              .items_center()
+              .justify_center()
+              .text_color(C.dim)
+              .hover((s) => s.bg(C.chip).text_color(C.text))
+              .on_click((_e, cx) => {
+                cx.stop_propagation();
+                this.hovered = null;
+                close(term, pane, tab);
+              })
+              .child("×"),
+          ),
+        );
     };
 
     const machine = (m) => {
@@ -208,6 +259,11 @@ export default class Sidebar extends View {
 
     return v_flex()
       .id("ms-tree")
+      // A drag let go outside any row is no move.
+      .on_mouse_up("left", (_e, cx) => {
+        this.pressed = null;
+        cx.notify();
+      })
       .size_full()
       .pt(8)
       .px(4)
