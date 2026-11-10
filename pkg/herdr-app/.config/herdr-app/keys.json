@@ -59,7 +59,8 @@
     "shift-f2": "space.rename",
     "ctrl-shift-g": "mod.open:board",
     "ctrl-`": "mod.open:board",
-    "ctrl-shift-a": "mod.open:board"
+    "ctrl-shift-a": "mod.open:board",
+    "ctrl-shift-y": "layout.toggle:bot"
   },
   "terminal": {
     "ctrl-backspace": "send:\u0017",

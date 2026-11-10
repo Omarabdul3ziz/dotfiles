@@ -56,6 +56,7 @@ the unit's `serve` just exits.
 | `alt+up` / `alt+down` | previous / next agent |
 | `ctrl+shift+t` | new tab on the shown machine |
 | `ctrl+shift+b` | toggle the sidebar |
+| `ctrl+shift+y` | hide or show the bot above it |
 
 The rest live in `pkg/herdr-app/.config/herdr-app/keys.json`.
 
@@ -100,7 +101,7 @@ The sidebar mod lives in its own repo, to be published:
 
 ```bash
 git clone git@github.com:Omarabdul3ziz/herdr-machine-sidebar.git ~/src/omarz/herdr-machine-sidebar
-ln -s ~/src/omarz/herdr-machine-sidebar/mods/machine-sidebar ~/.config/herdr-app/mods/machine-sidebar
+for m in machine-sidebar sidebar-bot; do ln -s ~/src/omarz/herdr-machine-sidebar/mods/$m ~/.config/herdr-app/mods/$m; done
 ```
 
 After editing a mod, `herdr-app check <mod folder>` must
