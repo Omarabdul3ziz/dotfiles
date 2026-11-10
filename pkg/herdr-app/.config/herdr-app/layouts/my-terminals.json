@@ -17,7 +17,7 @@
           "id": "bot",
           "type": "block",
           "size": {
-            "px": 110
+            "px": 160
           },
           "window_drag": true,
           "content": {
