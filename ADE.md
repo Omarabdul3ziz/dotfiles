@@ -16,7 +16,7 @@ devbox and homelab. It owns the terminals; clients only show them.
 ```
 
 - **herdr-app** on the laptop is the only desktop client. Layout `my-terminals`:
-  one space per machine, and the `my-sidebar` mod lists each machine with every
+  one space per machine, and the `machine-sidebar` mod lists each machine with every
   terminal under it, flat: the program's icon (with a state dot), then the tab's
   name if you named it, else the shell's folder or the program's title. `↳`
   marks a sub-agent (a terminal an agent started). Name each machine's dashboard
@@ -52,7 +52,7 @@ the unit's `serve` just exits.
 | --- | --- |
 | `SUPER+SHIFT+RETURN` | open or focus herdr-app |
 | `SUPER+A` | the board: agents of every machine + the dispatcher line |
-| `ctrl+tab` / `ctrl+shift+tab` | next / previous machine |
+| `ctrl+tab` / `ctrl+shift+tab` | next / previous row in the sidebar, any program |
 | `alt+up` / `alt+down` | previous / next agent |
 | `ctrl+shift+t` | new tab on the shown machine |
 | `ctrl+shift+b` | toggle the sidebar |
@@ -96,7 +96,7 @@ cursor and mode come back as you left them.
 ### 1. herdr-app
 
 Tracked in `pkg/herdr-app` (keys, the `my-terminals` layout, the `board` and
-`my-sidebar` mods). After editing a mod, `herdr-app check <mod folder>` must
+`machine-sidebar` mods). After editing a mod, `herdr-app check <mod folder>` must
 pass; restart the app if the change does not show.
 
 ### 2. Machines

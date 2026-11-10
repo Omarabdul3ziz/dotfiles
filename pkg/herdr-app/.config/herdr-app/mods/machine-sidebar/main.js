@@ -29,12 +29,6 @@ function own(el) {
 const spaceOf = (machine) => spaces().find((p) => p.machine === machine);
 const machineOf = (address) => (address.includes("/") ? address.split("/")[0] : null);
 
-function goMachine(machine) {
-  const first = spaceOf(machine);
-  if (first) run("space.select", { id: first.id });
-  else run("space.new", { machine: machine ?? "" });
-}
-
 function newTab(machine) {
   const space = spaceOf(machine);
   if (space) run("tab.new", { space: space.id });
@@ -63,10 +57,6 @@ function loadFolded() {
   } catch {
     return new Set();
   }
-}
-
-function reachable() {
-  return machines().filter((m) => m.name === null || m.layout !== "unavailable");
 }
 
 // Agents the program table can't see: the `claude agents` dashboard reports no
@@ -139,14 +129,25 @@ export default class Sidebar extends View {
     cx.spawn(async (cx) => {
       for (;;) {
         const c = await nextCommand();
-        const step = c === "next-machine" ? 1 : c === "prev-machine" ? -1 : 0;
-        const all = reachable().map((m) => m.name);
-        const here = spaces().find((p) => p.active)?.machine ?? null;
-        if (step && all.length > 1) goMachine(all[(all.indexOf(here) + step + all.length) % all.length]);
+        const step = c === "next" ? 1 : c === "prev" ? -1 : 0;
+        if (step) this.step(step);
         // Touching cx ends this loop once a newer build of the mod replaces it.
         cx.notify();
       }
     });
+  }
+
+  // Ctrl+Tab: the next row as the sidebar shows them (folded machines skipped), any program.
+  step(by) {
+    const all = terminals();
+    const byPane = panes().filter((p) => p.terminal);
+    const order = machines()
+      .filter((m) => !this.folded.has(m.name ?? "here"))
+      .flatMap((m) => rowsOf(m.name, all, byPane));
+    if (!order.length) return;
+    const here = order.findIndex((t) => t.address === focused()?.terminal);
+    const next = order[(here + by + order.length) % order.length];
+    open(next, byPane.find((p) => p.terminal === next.address));
   }
 
   render() {

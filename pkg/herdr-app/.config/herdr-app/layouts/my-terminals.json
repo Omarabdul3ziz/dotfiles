@@ -10,7 +10,7 @@
       "id": "sidebar",
       "type": "block",
       "content": {
-        "mod": "my-sidebar"
+        "mod": "machine-sidebar"
       },
       "size": {
         "px": 220
