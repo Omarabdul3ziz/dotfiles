@@ -95,8 +95,15 @@ cursor and mode come back as you left them.
 
 ### 1. herdr-app
 
-Tracked in `pkg/herdr-app` (keys, the `my-terminals` layout, the `board` and
-`machine-sidebar` mods). After editing a mod, `herdr-app check <mod folder>` must
+Tracked in `pkg/herdr-app` (keys, the `my-terminals` layout, the `board` mod).
+The sidebar mod lives in its own repo, to be published:
+
+```bash
+git clone git@github.com:Omarabdul3ziz/herdr-machine-sidebar.git ~/src/omarz/herdr-machine-sidebar
+ln -s ~/src/omarz/herdr-machine-sidebar/mods/machine-sidebar ~/.config/herdr-app/mods/machine-sidebar
+```
+
+After editing a mod, `herdr-app check <mod folder>` must
 pass; restart the app if the change does not show.
 
 ### 2. Machines
