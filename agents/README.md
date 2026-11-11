@@ -32,7 +32,7 @@ A pack is a directory with any of `rules.md`, `INDEX.md`, `skills/<name>/`.
 List one per line in `~/.config/agents/packs` (machine-local, not tracked):
 
 ```
-~/src/omarz/homelab          # jarvis: PWA work settings, pwa
+~/src/omarz/pwa-pack          # jarvis: PWA work settings, pwa
 ~/hero/code/hero_brain       # devbox: Hero rules, catchup, repos, stack, raise
 ```
 

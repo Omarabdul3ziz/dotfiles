@@ -69,5 +69,5 @@ agent knows for sure.
 - How every agent behaves → `dotfiles/agents/persona.md`
 - A generic skill → `dotfiles/agents/skills/`
 - Hero rules or skills → `~/hero/code/hero_brain/{rules.md,skills/}`
-- PWA rules or skill → `~/src/omarz/homelab/{rules.md,skills/pwa}`
+- PWA rules or skill → `~/src/omarz/pwa-pack/{rules.md,skills/pwa}` (homelab server facts: the server's own `~/homelab/CLAUDE.md`)
 - Then `make agents` in dotfiles on that machine.
