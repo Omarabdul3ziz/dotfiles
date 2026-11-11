@@ -1,15 +1,16 @@
 /**
  * footer.ts — one-row status bar.
  *
- *   `⎇ main +2*1?3 │ Swift-1.5 · think:off │ ctx 19% ▰▰░░░░░░ 24k/128k │ ✓ ready │ hero_brain`
- *    git + dirt       model · thinking       ctx (color, bar, counts)    statuses  session
+ *   `~/hero/var/workspaces/ai (⎇ main +2*1) │ Swift-1.5 (think:off) │ 19%`
+ *    cwd + git (branch, dirt)      model (thinking)        ctx (color only)
  *
  * ctx colors: green <70%, warning 70-90%, error >90%. Left edge truncates first.
  * Git dirt from `git status --porcelain`, cached 1s (render runs per keystroke).
+ * Extension statuses (setStatus, e.g. pi-lens LSP) are deliberately NOT rendered.
  */
 
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
-import { truncateToWidth, visibleWidth } from "@earendil-works/pi-tui";
+import { truncateToWidth } from "@earendil-works/pi-tui";
 import { execFileSync } from "node:child_process";
 
 const SEP = " │ ";
@@ -71,56 +72,48 @@ export default function (pi: ExtensionAPI) {
 				const model = ctx.model;
 				const thinking = pi.getThinkingLevel();
 				const branch = footerData.getGitBranch();
-				const statuses = footerData.getExtensionStatuses();
-				const name = pi.getSessionName() ?? ctx.cwd.split("/").filter(Boolean).pop() ?? null;
 
 				const fmt = (n: number) =>
 					n < 1000 ? String(n) : n < 1_000_000 ? `${(n / 1000).toFixed(1)}k` : `${(n / 1_000_000).toFixed(1)}m`;
 
-				// 1. git branch + dirt (+ staged, * unstaged, ? untracked)
-				let git = branch ? theme.fg("muted", `⎇ ${branch}`) : "";
+				// 1. cwd, home-relative, with git branch + dirt (+ staged, * unstaged, ? untracked)
+				const home = process.env.HOME || process.env.USERPROFILE;
+				let cwd = ctx.cwd;
+				if (home && cwd.startsWith(home)) cwd = "~" + cwd.slice(home.length);
+				let git = theme.fg("muted", cwd);
 				if (branch) {
-					const lines = gitDirt(ctx!.cwd, branch).split("\n").filter(Boolean);
+					let g = `⎇ ${branch}`;
+					const lines = gitDirt(ctx.cwd, branch).split("\n").filter(Boolean);
 					const staged = lines.filter((l) => l[0] !== " " && l[0] !== "?").length;
 					const untracked = lines.filter((l) => l.startsWith("??")).length;
 					const bits: string[] = [];
 					if (staged) bits.push(`+${staged}`);
 					if (lines.length - staged - untracked) bits.push(`*${lines.length - staged - untracked}`);
 					if (untracked) bits.push(`?${untracked}`);
-					if (bits.length) git += theme.fg("warning", ` ${bits.join("")}`);
+					if (bits.length) g += theme.fg("warning", ` ${bits.join("")}`);
+					git += theme.fg("dim", " (") + g + theme.fg("dim", ")");
 				}
 
-				// 2. model · thinking level
+				// 2. model (thinking level)
 				const short: Record<string, string> = {
 					off: "off", minimal: "min", low: "low", medium: "med", high: "high", xhigh: "xhigh", max: "max",
 				};
-				const tc = thinking === "off" ? "dim" : thinking === "minimal" ? "muted" : "accent";
-				const think = theme.fg(tc, `think:${short[thinking] ?? thinking}`);
 				const modelSeg = theme.fg("accent", model ? model.name || model.id : "no-model")
-					+ theme.fg("dim", " · ") + think;
+					+ theme.fg("dim", " (think:")
+					+ theme.fg(thinking === "off" ? "dim" : thinking === "minimal" ? "muted" : "accent", short[thinking] ?? thinking)
+					+ theme.fg("dim", ")");
 
-				// 3. context: percent + block bar + counts
-				let ctxSeg = theme.fg("dim", "ctx —");
-				if (usage && usage.tokens != null) {
-					const pct = usage.percent ?? 0;
+				// 3. context: percent only, colored by usage
+				let ctxSeg = theme.fg("dim", "—%");
+				if (usage && usage.percent != null) {
+					const pct = usage.percent;
 					const color = pct > 90 ? "error" : pct > 70 ? "warning" : "success";
-					const filled = Math.round((pct / 100) * 8);
-					const bar = "▰".repeat(filled) + "░".repeat(8 - filled);
-					ctxSeg = theme.fg(color, `ctx ${Math.round(pct)}% ${bar} ${fmt(usage.tokens)}/${fmt(usage.contextWindow)}`);
+					ctxSeg = theme.fg(color, `${Math.round(pct)}%`);
 				}
 
-				// 4. statuses from other extensions (setStatus); fallback ready
-				const statusSeg = statuses.size
-					? theme.fg("muted", [...statuses.values()].join(" "))
-					: theme.fg("success", "✓ ready");
-
-				// 5. session name (right anchor)
-				const right = theme.fg("muted", name ?? "");
-				let left = [git, modelSeg, ctxSeg, statusSeg].filter(Boolean).join(SEP);
-				const avail = width - visibleWidth(right) - 1;
-				if (visibleWidth(left) > avail) left = truncateToWidth(left, Math.max(0, avail));
-				const pad = " ".repeat(Math.max(1, width - visibleWidth(left) - visibleWidth(right)));
-				return [truncateToWidth(left + pad + right, width)];
+				// Exactly three segments; extension statuses (pi-lens etc.) are not rendered.
+				const left = [git, modelSeg, ctxSeg].filter(Boolean).join(SEP);
+				return [truncateToWidth(left, width)];
 			},
 		};
 	};
