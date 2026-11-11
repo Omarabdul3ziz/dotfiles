@@ -12,6 +12,8 @@ echo "deps"
 desktop=; command -v Hyprland >/dev/null 2>&1 && desktop=1
 [ -n "$desktop" ] && deskdeps="foot herdr-app"
 for c in $deskdeps fish hc claude lazygit glow helix delta jq git python3; do
+  # Arch ships helix as `helix`, most other distros as `hx`.
+  [ "$c" = helix ] && command -v hx >/dev/null 2>&1 && { ok "$c"; continue; }
   command -v "$c" >/dev/null 2>&1 && ok "$c" || bad "$c missing"
 done
 
