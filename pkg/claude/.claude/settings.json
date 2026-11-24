@@ -43,7 +43,6 @@
     }
   },
   "viewMode": "focus",
-  "defaultToAgentsView": true,
   "spinnerTipsEnabled": false,
   "promptSuggestionEnabled": false,
   "askUserQuestionTimeout": "5m",
@@ -80,5 +79,6 @@
   },
   "voiceEnabled": true,
   "skipWorkflowUsageWarning": true,
-  "remoteControlAtStartup": true
+  "remoteControlAtStartup": true,
+  "switchModelsOnFlag": true
 }
