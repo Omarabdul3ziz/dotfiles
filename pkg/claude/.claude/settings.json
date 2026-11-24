@@ -43,6 +43,7 @@
     }
   },
   "viewMode": "focus",
+  "defaultToAgentsView": false,
   "spinnerTipsEnabled": false,
   "promptSuggestionEnabled": false,
   "askUserQuestionTimeout": "5m",
